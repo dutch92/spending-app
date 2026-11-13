@@ -86,3 +86,15 @@ main>section{min-width:0;max-width:100%}
 .pwa-update-actions{display:flex;gap:10px}
 .pwa-update-actions button{flex:1;min-height:42px;border:0;border-radius:10px;background:#2563eb;color:white;font-weight:600}
 .pwa-update-actions button+button{background:#384355}
+
+/* Compact, closed-by-default category management in Settings */
+.settings-categories{margin-top:20px;border:1px solid #e4e7ed;border-radius:14px;background:#fff;overflow:hidden}
+.settings-categories-toggle{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px;cursor:pointer;font-size:16px;font-weight:650;list-style:none}
+.settings-categories-toggle::-webkit-details-marker{display:none}
+.settings-categories-toggle small{font-size:13px;font-weight:400;color:#8390a1}
+.settings-categories-chevron{color:#667085;transition:transform .15s}
+.settings-categories[open] .settings-categories-chevron{transform:rotate(180deg)}
+.settings-categories-body{padding:0 12px 12px}
+.settings-categories .add-category{margin-bottom:12px}
+.settings-categories .add-category input{min-width:0;flex:1}
+.settings-categories .setting-row{border-top:1px solid #f0f1f4;border-radius:0;padding:10px 0;gap:4px}
