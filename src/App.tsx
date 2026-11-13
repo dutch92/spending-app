@@ -4,7 +4,7 @@ import packageInfo from '../package.json';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
 import { downloadBackup, readBackupFile, restoreBackup } from './backup';
-import { connectGoogleDrive, disconnectGoogleDrive, isGoogleConnected } from './googleDrive';
+import { connectGoogleDrive, disconnectGoogleDrive, isGoogleConnected, wasGoogleDriveAuthorized } from './googleDrive';
 import { uploadDriveBackup, listDriveBackups, downloadDriveBackup, type DriveBackupFile } from './driveBackup';
 
 type Tab = 'add' | 'history' | 'stats' | 'settings';
@@ -379,13 +379,13 @@ export default function App() {
             <p className="warning">Восстановление полностью заменяет текущие данные. Сначала создайте копию. Резервный файл содержит ваши финансовые записи без шифрования.</p>
             <h2>Google Drive</h2>
             <div className="google-drive-panel">
-              <div className="google-drive-status">{googleConnected && isGoogleConnected() ? '● Google Drive подключён' : '○ Google Drive не подключён'}</div>
+              <div className="google-drive-status">{googleConnected && isGoogleConnected() ? '● Google Drive подключён' : wasGoogleDriveAuthorized() ? '○ Google Drive: требуется возобновить сеанс' : '○ Google Drive не подключён'}</div>
               {googleConnected && isGoogleConnected() ? (
                 <button type="button" className="update-check" onClick={disconnectGoogle}>Отключить Google Drive</button>
               ) : (
-                <button type="button" className="primary google-connect" disabled={googleBusy} onClick={() => void authorizeGoogle()}>{googleBusy ? 'Подключение…' : 'Подключить Google Drive'}</button>
+                <button type="button" className="primary google-connect" disabled={googleBusy} onClick={() => void authorizeGoogle()}>{googleBusy ? 'Подключение…' : wasGoogleDriveAuthorized() ? 'Возобновить доступ Google Drive' : 'Подключить Google Drive'}</button>
               )}
-              <p className="muted">Google запросит доступ только к файлам, созданным или открытым через Spending App. Токен действует временно и не сохраняется на устройстве.</p>
+              <p className="muted">Для безопасности токен хранится только в памяти. После закрытия приложения нужно возобновить сеанс одним нажатием. Если Google помнит выданное разрешение, повторное согласие не требуется.</p>
               {googleConnected && isGoogleConnected() && <div className="drive-backup-actions">
                 <button type="button" className="primary google-connect" disabled={driveBackupBusy} onClick={() => void saveToDrive()}>{driveBackupBusy ? 'Выполняется операция…' : 'Создать копию в Google Drive'}</button>
                 <button type="button" className="update-check" disabled={driveBackupBusy} onClick={() => void refreshDriveBackups()}>Показать резервные копии</button>
