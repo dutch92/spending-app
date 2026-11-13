@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
+import { downloadBackup, readBackupFile, restoreBackup } from './backup';
 
 type Tab = 'add' | 'history' | 'stats' | 'settings';
 const money = (kopecks: number) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(kopecks / 100);
@@ -33,6 +34,7 @@ export default function App() {
   const [categoryName, setCategoryName] = useState('');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [backupBusy, setBackupBusy] = useState(false);
 
   const counts = useMemo(() => {
     const result: Record<string, number> = {};
@@ -114,6 +116,39 @@ export default function App() {
     if (!name || name === c.name || categories.some((v) => v.id !== c.id && v.name.toLowerCase() === name.toLowerCase())) return;
     await db.categories.update(c.id, { name });
   }
+  async function exportBackup() {
+    setBackupBusy(true);
+    try {
+      const result = await downloadBackup();
+      setNotice(`Подготовлена копия: ${result.expenses} расходов, ${result.categories} категорий. Сохраните файл в «Файлы».`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Не удалось создать копию.');
+    } finally {
+      setBackupBusy(false);
+    }
+  }
+
+  async function importBackup(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (!file) return;
+    setBackupBusy(true);
+    try {
+      const backup = await readBackupFile(file);
+      const confirmMessage = `Восстановить копию от ${new Date(backup.exportedAt).toLocaleString('ru-RU')}?\n\n` +
+        `В файле ${backup.expenses.length} расходов и ${backup.categories.length} категорий.\n\n` +
+        'ВСЕ текущие расходы и категории на устройстве будут заменены! Перед этим рекомендуется сохранить текущую копию.';
+      if (!window.confirm(confirmMessage)) return;
+      await restoreBackup(backup);
+      resetForm();
+      setNotice(`Восстановлено расходов: ${backup.expenses.length}, категорий: ${backup.categories.length}.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Не удалось восстановить данные.');
+    } finally {
+      setBackupBusy(false);
+    }
+  }
+
   const empty = <p className="muted empty">Пока нет расходов за выбранный месяц.</p>;
   return (
     <div className="app">
@@ -212,9 +247,16 @@ export default function App() {
             {categories.map((c) => (
               <div key={c.id} className="setting-row"><span>{c.icon} {c.name}{c.archived ? ' (архив)' : ''}</span><button onClick={() => void renameCategory(c)}>Название</button><button onClick={() => void db.categories.update(c.id, { archived: !c.archived })}>{c.archived ? 'Вернуть' : 'Скрыть'}</button></div>
             ))}
+            <h2>Резервное копирование</h2>
+            <p className="muted">Сохраняйте JSON-копию в приложение «Файлы» на iPhone или в iCloud Drive. В копию входят все расходы и категории.</p>
+            <div className="backup-actions">
+              <button className="primary" type="button" disabled={backupBusy} onClick={() => void exportBackup()}>Скачать резервную копию JSON</button>
+              <label className="backup-import" htmlFor="backup-file">Восстановить из JSON</label>
+              <input id="backup-file" className="backup-file" type="file" accept=".json,application/json" disabled={backupBusy} onChange={(event) => void importBackup(event)} />
+            </div>
+            <p className="warning">Восстановление полностью заменяет текущие данные. Сначала создайте копию. Резервный файл содержит ваши финансовые записи без шифрования.</p>
             <h2>Облако</h2>
-            <p className="muted">Google Drive и Google Sheets подключим в следующем этапе. Резервные копии и экспорт будут запускаться только вручную.</p>
-            <p className="warning">Данные хранятся только на этом устройстве. Не очищайте данные сайта до реализации резервного копирования.</p>
+            <p className="muted">Интеграции Google Drive и Google Sheets добавим следующим этапом. Облачные операции будут только ручными.</p>
           </section>
         )}
         {notice && <div className="notice" role="status" onClick={() => setNotice('')}>{notice} <span>×</span></div>}
