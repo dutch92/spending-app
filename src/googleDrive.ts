@@ -31,6 +31,12 @@ declare global {
 
 let accessToken: string | null = null;
 let expiresAt = 0;
+const REMEMBERED_KEY = 'spending-app-google-drive-authorized';
+
+export function wasGoogleDriveAuthorized(): boolean {
+  try { return localStorage.getItem(REMEMBERED_KEY) === 'yes'; } catch { return false; }
+}
+
 
 export function isGoogleConnected(): boolean {
   return Boolean(accessToken && Date.now() < expiresAt);
@@ -59,6 +65,7 @@ export function connectGoogleDrive(): Promise<void> {
           }
           accessToken = result.access_token;
           expiresAt = Date.now() + Math.max(0, (result.expires_in ?? 3600) - 60) * 1000;
+          try { localStorage.setItem(REMEMBERED_KEY, 'yes'); } catch { /* optional remembered preference */ }
           resolve();
         } catch (error) {
           reject(error);
@@ -67,7 +74,7 @@ export function connectGoogleDrive(): Promise<void> {
       error_callback: (error) => reject(new Error('Не удалось открыть окно Google: ' + error.type)),
     });
     // Triggered directly by the user's button click, required for browser popups.
-    client.requestAccessToken({ prompt: 'consent' });
+    client.requestAccessToken({ prompt: wasGoogleDriveAuthorized() ? '' : 'consent' });
   });
 }
 
@@ -84,4 +91,5 @@ export function disconnectGoogleDrive() {
   }
   accessToken = null;
   expiresAt = 0;
+  try { localStorage.removeItem(REMEMBERED_KEY); } catch { /* ignore */ }
 }
