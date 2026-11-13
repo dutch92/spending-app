@@ -4,6 +4,7 @@ import packageInfo from '../package.json';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
 import { downloadBackup, readBackupFile, restoreBackup } from './backup';
+import { connectGoogleDrive, disconnectGoogleDrive, isGoogleConnected } from './googleDrive';
 
 type Tab = 'add' | 'history' | 'stats' | 'settings';
 const money = (kopecks: number) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(kopecks / 100);
@@ -80,6 +81,9 @@ export default function App() {
   }
 
   const [backupBusy, setBackupBusy] = useState(false);
+  const [googleConnected, setGoogleConnected] = useState(isGoogleConnected);
+  const [googleBusy, setGoogleBusy] = useState(false);
+
 
   const counts = useMemo(() => {
     const result: Record<string, number> = {};
@@ -161,6 +165,26 @@ export default function App() {
     if (!name || name === c.name || categories.some((v) => v.id !== c.id && v.name.toLowerCase() === name.toLowerCase())) return;
     await db.categories.update(c.id, { name });
   }
+  async function authorizeGoogle() {
+    setGoogleBusy(true);
+    try {
+      await connectGoogleDrive();
+      setGoogleConnected(true);
+      setNotice('Доступ к Google Drive подтверждён.');
+    } catch (error) {
+      setGoogleConnected(false);
+      setNotice(error instanceof Error ? error.message : 'Не удалось подключить Google Drive.');
+    } finally {
+      setGoogleBusy(false);
+    }
+  }
+
+  function disconnectGoogle() {
+    disconnectGoogleDrive();
+    setGoogleConnected(false);
+    setNotice('Google Drive отключён на этом устройстве.');
+  }
+
   async function exportBackup() {
     setBackupBusy(true);
     try {
@@ -296,8 +320,17 @@ export default function App() {
               <input id="backup-file" className="backup-file" type="file" accept=".json,application/json" disabled={backupBusy} onChange={(event) => void importBackup(event)} />
             </div>
             <p className="warning">Восстановление полностью заменяет текущие данные. Сначала создайте копию. Резервный файл содержит ваши финансовые записи без шифрования.</p>
-            <h2>Облако</h2>
-            <p className="muted">Интеграции Google Drive и Google Sheets добавим следующим этапом. Облачные операции будут только ручными.</p>
+            <h2>Google Drive</h2>
+            <div className="google-drive-panel">
+              <div className="google-drive-status">{googleConnected && isGoogleConnected() ? '● Google Drive подключён' : '○ Google Drive не подключён'}</div>
+              {googleConnected && isGoogleConnected() ? (
+                <button type="button" className="update-check" onClick={disconnectGoogle}>Отключить Google Drive</button>
+              ) : (
+                <button type="button" className="primary google-connect" disabled={googleBusy} onClick={() => void authorizeGoogle()}>{googleBusy ? 'Подключение…' : 'Подключить Google Drive'}</button>
+              )}
+              <p className="muted">Google запросит доступ только к файлам, созданным или открытым через Spending App. Токен действует временно и не сохраняется на устройстве.</p>
+              <p className="muted">На этом этапе проверяем авторизацию. Загрузка копий в Google Drive и экспорт в Google Sheets появятся позже.</p>
+            </div>
             <details className="settings-categories">
               <summary className="settings-categories-toggle">
                 <span>Категории <small>({categories.length})</small></span>
