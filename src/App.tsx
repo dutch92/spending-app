@@ -141,8 +141,16 @@ export default function App() {
               {showDetails && <div className="expense-details">
                 <label htmlFor="comment">Комментарий (необязательно)</label>
                 <textarea id="comment" rows={2} placeholder="На что потратили?" value={comment} onChange={(e) => setComment(e.target.value)} />
-                <label htmlFor="date">Дата и время</label>
-                <input id="date" type="datetime-local" value={spentAt} onChange={(e) => setSpentAt(e.target.value)} />
+                <div className="date-time-grid">
+                  <div className="date-time-field">
+                    <label htmlFor="spent-date">Дата</label>
+                    <input id="spent-date" type="date" value={spentAt.slice(0, 10)} onChange={(e) => setSpentAt(`${e.target.value}T${spentAt.slice(11, 16)}`)} />
+                  </div>
+                  <div className="date-time-field">
+                    <label htmlFor="spent-time">Время</label>
+                    <input id="spent-time" type="time" value={spentAt.slice(11, 16)} onChange={(e) => setSpentAt(`${spentAt.slice(0, 10)}T${e.target.value}`)} />
+                  </div>
+                </div>
               </div>}
               {editingId && <button className="secondary" type="button" onClick={resetForm}>Отменить редактирование</button>}
             </form>
