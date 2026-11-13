@@ -33,9 +33,12 @@
   .expense-form .amount{height:46px}
 }
 
-/* Keep native iOS date/time inputs inside their columns. */
-.date-time-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%}
-.date-time-field{min-width:0;max-width:100%;overflow:hidden;display:flex;flex-direction:column;gap:5px}
+/* Render our own compact values; the transparent native inputs retain iOS pickers. */
+.date-time-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;width:100%}
+.date-time-field{min-width:0;display:flex;flex-direction:column;gap:6px}
 .date-time-field label{font-size:12px;color:#667085;margin:0}
-.date-time-field input{display:block;box-sizing:border-box;min-width:0;max-width:100%;width:100%;padding:10px 5px;font-size:14px;line-height:1.25}
+.picker-surface{height:48px;min-width:0;width:100%;position:relative;display:flex;align-items:center;justify-content:center;border:1px solid #dee2eb;border-radius:12px;background:#f8f9fb;overflow:hidden}
+.picker-value{pointer-events:none;font-size:15px;line-height:1;white-space:nowrap;color:#172033}
+.date-time-field .picker-surface input{position:absolute;inset:0;width:100%;height:100%;min-width:0;max-width:100%;margin:0;padding:0;opacity:0;cursor:pointer;z-index:1}
+.picker-surface:focus-within{outline:2px solid #2563eb;outline-offset:1px}
 @media(max-width:350px){.date-time-grid{grid-template-columns:minmax(0,1fr)}}
