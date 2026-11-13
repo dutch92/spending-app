@@ -71,6 +71,13 @@ export function connectGoogleDrive(): Promise<void> {
   });
 }
 
+export function getGoogleAccessToken(): string {
+  if (!isGoogleConnected() || !accessToken) {
+    throw new Error('Сеанс Google истёк. Подключите Google Drive повторно.');
+  }
+  return accessToken;
+}
+
 export function disconnectGoogleDrive() {
   if (accessToken && window.google?.accounts?.oauth2) {
     window.google.accounts.oauth2.revoke(accessToken, () => undefined);
