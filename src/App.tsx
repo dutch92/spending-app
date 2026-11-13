@@ -31,6 +31,8 @@ export default function App() {
   const [notice, setNotice] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(() => localDateTime(new Date()).slice(0, 7));
   const [categoryName, setCategoryName] = useState('');
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const counts = useMemo(() => {
     const result: Record<string, number> = {};
@@ -39,6 +41,12 @@ export default function App() {
   }, [expenses]);
   const activeCategories = [...categories].filter((c) => !c.archived || c.id === categoryId)
     .sort((a, b) => (counts[b.id] ?? 0) - (counts[a.id] ?? 0) || a.name.localeCompare(b.name, 'ru'));
+  const compactCategories = activeCategories.slice(0, 8);
+  const selectedCategory = activeCategories.find((c) => c.id === categoryId);
+  if (selectedCategory && !compactCategories.some((c) => c.id === categoryId)) {
+    compactCategories[compactCategories.length - 1] = selectedCategory;
+  }
+  const visibleCategories = showAllCategories ? activeCategories : compactCategories;
   const categoryMap = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
   const filtered = expenses.filter((e) => monthKey(e.spentAt) === selectedMonth);
   const total = filtered.reduce((sum, e) => sum + e.amountKopecks, 0);
@@ -62,12 +70,12 @@ export default function App() {
   const maxDay = Math.max(1, ...dailyTotals.map((day) => day.total));
 
   function resetForm() {
-    setAmount(''); setCategoryId(''); setComment(''); setSpentAt(localDateTime(new Date())); setEditingId(null);
+    setAmount(''); setCategoryId(''); setComment(''); setSpentAt(localDateTime(new Date())); setEditingId(null); setShowDetails(false); setShowAllCategories(false);
   }
   function startEdit(expense: Expense) {
     setEditingId(expense.id); setAmount((expense.amountKopecks / 100).toFixed(2).replace(/\.00$/, ''));
     setCategoryId(expense.categoryId); setComment(expense.comment);
-    setSpentAt(localDateTime(new Date(expense.spentAt))); setTab('add'); setNotice('');
+    setSpentAt(localDateTime(new Date(expense.spentAt))); setTab('add'); setNotice(''); setShowDetails(true);
   }
   async function saveExpense(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -112,24 +120,30 @@ export default function App() {
       <header className="topbar"><span className="logo">◉</span><strong>Spending App</strong><span className="topbar-right">Локально на iPhone</span></header>
       <main>
         {tab === 'add' && (
-          <section className="panel">
+          <section className="panel expense-panel">
             <h1>{editingId ? 'Изменить расход' : 'Новый расход'}</h1>
-            <form onSubmit={saveExpense}>
+            <form className="expense-form" onSubmit={saveExpense}>
               <label htmlFor="amount">Сумма, ₽</label>
               <input id="amount" className="amount" type="text" inputMode="decimal" autoComplete="off" placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
-              <label>Категория</label>
+              <div className="category-heading"><label>Категория</label>{activeCategories.length > 8 && <button className="text-button" type="button" onClick={() => setShowAllCategories((v) => !v)}>{showAllCategories ? 'Свернуть' : `Все (${activeCategories.length})`}</button>}</div>
               <div className="category-grid">
-                {activeCategories.map((c) => (
+                {visibleCategories.map((c) => (
                   <button key={c.id} type="button" className={'category ' + (categoryId === c.id ? 'selected' : '')} onClick={() => setCategoryId(c.id)}>
                     <span className="emoji">{c.icon}</span><span>{c.name}</span>
                   </button>
                 ))}
               </div>
-              <label htmlFor="comment">Комментарий (необязательно)</label>
-              <textarea id="comment" rows={2} placeholder="На что потратили?" value={comment} onChange={(e) => setComment(e.target.value)} />
-              <label htmlFor="date">Дата и время</label>
-              <input id="date" type="datetime-local" value={spentAt} onChange={(e) => setSpentAt(e.target.value)} />
-              <button className="primary" type="submit" disabled={busy || !parseKopecks(amount) || !categoryId || !spentAt}>{busy ? 'Сохраняем…' : editingId ? 'Сохранить изменения' : 'Сохранить расход'}</button>
+              <button className="primary save-expense" type="submit" disabled={busy || !parseKopecks(amount) || !categoryId || !spentAt}>{busy ? 'Сохраняем…' : editingId ? 'Сохранить изменения' : 'Сохранить расход'}</button>
+              <button className="details-toggle" type="button" aria-expanded={showDetails} onClick={() => setShowDetails((v) => !v)}>
+                <span>{showDetails ? 'Скрыть дополнительные поля' : 'Комментарий, дата и время'}</span>
+                <span aria-hidden="true">{showDetails ? '⌃' : '⌄'}</span>
+              </button>
+              {showDetails && <div className="expense-details">
+                <label htmlFor="comment">Комментарий (необязательно)</label>
+                <textarea id="comment" rows={2} placeholder="На что потратили?" value={comment} onChange={(e) => setComment(e.target.value)} />
+                <label htmlFor="date">Дата и время</label>
+                <input id="date" type="datetime-local" value={spentAt} onChange={(e) => setSpentAt(e.target.value)} />
+              </div>}
               {editingId && <button className="secondary" type="button" onClick={resetForm}>Отменить редактирование</button>}
             </form>
           </section>
