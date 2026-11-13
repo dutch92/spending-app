@@ -144,11 +144,17 @@ export default function App() {
                 <div className="date-time-grid">
                   <div className="date-time-field">
                     <label htmlFor="spent-date">Дата</label>
-                    <input id="spent-date" type="date" value={spentAt.slice(0, 10)} onChange={(e) => setSpentAt(`${e.target.value}T${spentAt.slice(11, 16)}`)} />
+                    <div className="picker-surface">
+                      <span className="picker-value" aria-hidden="true">{spentAt.slice(0, 10) ? new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(spentAt.slice(0, 10) + 'T12:00:00')) : 'Выбрать дату'}</span>
+                      <input id="spent-date" aria-label="Дата расхода" type="date" value={spentAt.slice(0, 10)} onChange={(e) => setSpentAt(`${e.target.value}T${spentAt.slice(11, 16)}`)} />
+                    </div>
                   </div>
                   <div className="date-time-field">
                     <label htmlFor="spent-time">Время</label>
-                    <input id="spent-time" type="time" value={spentAt.slice(11, 16)} onChange={(e) => setSpentAt(`${spentAt.slice(0, 10)}T${e.target.value}`)} />
+                    <div className="picker-surface">
+                      <span className="picker-value" aria-hidden="true">{spentAt.slice(11, 16) || 'Выбрать время'}</span>
+                      <input id="spent-time" aria-label="Время расхода" type="time" value={spentAt.slice(11, 16)} onChange={(e) => setSpentAt(`${spentAt.slice(0, 10)}T${e.target.value}`)} />
+                    </div>
                   </div>
                 </div>
               </div>}
