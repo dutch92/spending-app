@@ -287,11 +287,7 @@ export default function App() {
         )}
         {tab === 'settings' && (
           <section>
-            <h1>Категории</h1>
-            <form className="add-category" onSubmit={addCategory}><input aria-label="Новая категория" placeholder="Название категории" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} /><button type="submit">Добавить</button></form>
-            {categories.map((c) => (
-              <div key={c.id} className="setting-row"><span>{c.icon} {c.name}{c.archived ? ' (архив)' : ''}</span><button onClick={() => void renameCategory(c)}>Название</button><button onClick={() => void db.categories.update(c.id, { archived: !c.archived })}>{c.archived ? 'Вернуть' : 'Скрыть'}</button></div>
-            ))}
+            <h1>Настройки</h1>
             <h2>Резервное копирование</h2>
             <p className="muted">Сохраняйте JSON-копию в приложение «Файлы» на iPhone или в iCloud Drive. В копию входят все расходы и категории.</p>
             <div className="backup-actions">
@@ -302,6 +298,18 @@ export default function App() {
             <p className="warning">Восстановление полностью заменяет текущие данные. Сначала создайте копию. Резервный файл содержит ваши финансовые записи без шифрования.</p>
             <h2>Облако</h2>
             <p className="muted">Интеграции Google Drive и Google Sheets добавим следующим этапом. Облачные операции будут только ручными.</p>
+            <details className="settings-categories">
+              <summary className="settings-categories-toggle">
+                <span>Категории <small>({categories.length})</small></span>
+                <span className="settings-categories-chevron" aria-hidden="true">⌄</span>
+              </summary>
+              <div className="settings-categories-body">
+                <form className="add-category" onSubmit={addCategory}><input aria-label="Новая категория" placeholder="Название категории" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} /><button type="submit">Добавить</button></form>
+                {categories.map((c) => (
+                  <div key={c.id} className="setting-row"><span>{c.icon} {c.name}{c.archived ? ' (архив)' : ''}</span><button onClick={() => void renameCategory(c)}>Название</button><button onClick={() => void db.categories.update(c.id, { archived: !c.archived })}>{c.archived ? 'Вернуть' : 'Скрыть'}</button></div>
+                ))}
+              </div>
+            </details>
             <h2>О приложении</h2>
             <div className="app-version-row"><span>Версия</span><strong>{packageInfo.version}</strong></div>
             <button className="update-check" type="button" disabled={checkingUpdates} onClick={() => void checkForUpdates()}>
