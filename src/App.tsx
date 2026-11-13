@@ -8,8 +8,8 @@ const localDateTime = (date: Date) => {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
   return local.toISOString().slice(0, 16);
 };
-const dayKey = (iso: string) => iso.slice(0, 10);
-const monthKey = (iso: string) => iso.slice(0, 7);
+const dayKey = (iso: string) => localDateTime(new Date(iso)).slice(0, 10);
+const monthKey = (iso: string) => localDateTime(new Date(iso)).slice(0, 7);
 const monthLabel = (key: string) => new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(new Date(key + '-01T12:00:00'));
 const parseKopecks = (value: string) => {
   const cleaned = value.trim().replace(',', '.');
