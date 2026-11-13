@@ -31,7 +31,7 @@ function validExpense(value: unknown): value is Expense {
   return isRecord(value) &&
     typeof value.id === 'string' && value.id.length > 0 &&
     typeof value.categoryId === 'string' && value.categoryId.length > 0 &&
-    Number.isSafeInteger(value.amountKopecks) && (value.amountKopecks as number) > 0 &&
+    typeof value.amountKopecks === 'number' && Number.isSafeInteger(value.amountKopecks) && value.amountKopecks > 0 &&
     typeof value.comment === 'string' &&
     validIso(value.spentAt) && validIso(value.createdAt) && validIso(value.updatedAt);
 }
