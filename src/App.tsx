@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
+import packageInfo from '../package.json';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
 import { downloadBackup, readBackupFile, restoreBackup } from './backup';
@@ -34,6 +36,49 @@ export default function App() {
   const [categoryName, setCategoryName] = useState('');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [swRegistration, setSwRegistration] = useState<ServiceWorkerRegistration | null>(null);
+  const [checkingUpdates, setCheckingUpdates] = useState(false);
+  const [updateNoticeHidden, setUpdateNoticeHidden] = useState(false);
+  const {
+    needRefresh: [needRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegisteredSW(_url, registration) {
+      if (registration) setSwRegistration(registration);
+    },
+    onRegisterError(error) {
+      console.error('PWA registration failed:', error);
+    },
+  });
+
+  async function checkForUpdates() {
+    if (!swRegistration) {
+      setNotice('Проверка обновлений станет доступна после регистрации PWA.');
+      return;
+    }
+    if (!navigator.onLine) {
+      setNotice('Для проверки обновлений нужен интернет.');
+      return;
+    }
+    setCheckingUpdates(true);
+    try {
+      await swRegistration.update();
+      setUpdateNoticeHidden(false);
+      setNotice('Проверка выполнена. Если новая версия найдена, появится предложение обновить приложение.');
+    } catch {
+      setNotice('Не удалось проверить обновления. Попробуйте позже.');
+    } finally {
+      setCheckingUpdates(false);
+    }
+  }
+
+  async function applyUpdate() {
+    if (amount.trim() || comment.trim() || categoryId || editingId) {
+      if (!window.confirm('Несохранённые данные формы будут потеряны при обновлении. Продолжить?')) return;
+    }
+    await updateServiceWorker(true);
+  }
+
   const [backupBusy, setBackupBusy] = useState(false);
 
   const counts = useMemo(() => {
@@ -257,8 +302,22 @@ export default function App() {
             <p className="warning">Восстановление полностью заменяет текущие данные. Сначала создайте копию. Резервный файл содержит ваши финансовые записи без шифрования.</p>
             <h2>Облако</h2>
             <p className="muted">Интеграции Google Drive и Google Sheets добавим следующим этапом. Облачные операции будут только ручными.</p>
+            <h2>О приложении</h2>
+            <div className="app-version-row"><span>Версия</span><strong>{packageInfo.version}</strong></div>
+            <button className="update-check" type="button" disabled={checkingUpdates} onClick={() => void checkForUpdates()}>
+              {checkingUpdates ? 'Проверяем…' : 'Проверить обновления'}
+            </button>
+            {needRefresh && <button className="primary update-check" type="button" onClick={() => void applyUpdate()}>Установить новую версию</button>}
+            <p className="muted">Новая версия загружается через GitHub Pages. Обновление применяется только после вашего подтверждения.</p>
           </section>
         )}
+        {needRefresh && !updateNoticeHidden && <div className="pwa-update-banner" role="status">
+          <div className="pwa-update-title">Доступна новая версия Spending App</div>
+          <div className="pwa-update-actions">
+            <button type="button" onClick={() => void applyUpdate()}>Обновить</button>
+            <button type="button" onClick={() => setUpdateNoticeHidden(true)}>Позже</button>
+          </div>
+        </div>}
         {notice && <div className="notice" role="status" onClick={() => setNotice('')}>{notice} <span>×</span></div>}
       </main>
       <nav className="bottom-nav" aria-label="Навигация">
