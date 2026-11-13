@@ -166,7 +166,10 @@ export default function App() {
           <section>
             <h1>История расходов</h1>
             <label htmlFor="history-month">Месяц</label>
-            <input id="history-month" type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
+            <div className="picker-surface month-picker">
+              <span className="picker-value" aria-hidden="true">{monthLabel(selectedMonth)}</span>
+              <input id="history-month" aria-label="Выбрать месяц" type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
+            </div>
             <div className="summary"><span>За {monthLabel(selectedMonth)}</span><strong>{money(total)}</strong></div>
             {groups.length === 0 ? empty : groups.map(([day, rows]) => (
               <div key={day} className="day-group">
@@ -187,7 +190,10 @@ export default function App() {
           <section>
             <h1>Статистика</h1>
             <label htmlFor="stats-month">Месяц</label>
-            <input id="stats-month" type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
+            <div className="picker-surface month-picker">
+              <span className="picker-value" aria-hidden="true">{monthLabel(selectedMonth)}</span>
+              <input id="stats-month" aria-label="Выбрать месяц" type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
+            </div>
             <div className="summary"><span>Всего за месяц</span><strong>{money(total)}</strong><small>Предыдущий месяц: {money(previousTotal)}{previousTotal > 0 ? ' · ' + ((total - previousTotal) / previousTotal * 100).toFixed(1) + '%' : ''}</small></div>
             <h2>По категориям</h2>
             {categoryTotals.length ? categoryTotals.map(([id, sum]) => (
