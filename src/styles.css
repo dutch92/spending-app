@@ -68,3 +68,10 @@ main>section{min-width:0;max-width:100%}
   .expense>strong{font-size:12px}
   .day-header,.stat-row>div:first-child{font-size:12px}
 }
+
+/* Manual local backup actions */
+.backup-actions{display:flex;flex-direction:column;gap:10px;min-width:0}
+.backup-actions .primary{margin:0;width:100%;min-height:48px}
+.backup-import{display:block;text-align:center;background:#e7efff;color:#1d4ed8;border-radius:12px;padding:14px;font-size:14px;font-weight:650;cursor:pointer;margin:0}
+.backup-file{position:absolute;width:1px;height:1px;padding:0;border:0;opacity:0;overflow:hidden}
+.backup-actions:has(.backup-file:disabled) .backup-import{opacity:.5;pointer-events:none}
