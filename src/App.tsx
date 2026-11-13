@@ -5,6 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
 import { downloadBackup, readBackupFile, restoreBackup } from './backup';
 import { connectGoogleDrive, disconnectGoogleDrive, isGoogleConnected } from './googleDrive';
+import { uploadDriveBackup, listDriveBackups, downloadDriveBackup, type DriveBackupFile } from './driveBackup';
 
 type Tab = 'add' | 'history' | 'stats' | 'settings';
 const money = (kopecks: number) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(kopecks / 100);
@@ -83,6 +84,9 @@ export default function App() {
   const [backupBusy, setBackupBusy] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(isGoogleConnected);
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [driveBackups, setDriveBackups] = useState<DriveBackupFile[]>([]);
+  const [selectedDriveBackupId, setSelectedDriveBackupId] = useState('');
+  const [driveBackupBusy, setDriveBackupBusy] = useState(false);
 
 
   const counts = useMemo(() => {
@@ -170,6 +174,8 @@ export default function App() {
     try {
       await connectGoogleDrive();
       setGoogleConnected(true);
+      setDriveBackups([]);
+      setSelectedDriveBackupId('');
       setNotice('Доступ к Google Drive подтверждён.');
     } catch (error) {
       setGoogleConnected(false);
@@ -182,7 +188,58 @@ export default function App() {
   function disconnectGoogle() {
     disconnectGoogleDrive();
     setGoogleConnected(false);
+    setDriveBackups([]);
+    setSelectedDriveBackupId('');
     setNotice('Google Drive отключён на этом устройстве.');
+  }
+
+  async function saveToDrive() {
+    setDriveBackupBusy(true);
+    try {
+      const result = await uploadDriveBackup();
+      setNotice(`Google Drive: сохранена копия с ${result.expenses} расходами.`);
+      const files = await listDriveBackups();
+      setDriveBackups(files);
+      setSelectedDriveBackupId(result.id);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Не удалось сохранить копию в Google Drive.');
+    } finally {
+      setDriveBackupBusy(false);
+    }
+  }
+
+  async function refreshDriveBackups() {
+    setDriveBackupBusy(true);
+    try {
+      const files = await listDriveBackups();
+      setDriveBackups(files);
+      setSelectedDriveBackupId((current) => files.some((file) => file.id === current) ? current : (files[0]?.id ?? ''));
+      setNotice(files.length ? `Найдено резервных копий: ${files.length}.` : 'Резервных копий в Google Drive пока нет.');
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Не удалось прочитать резервные копии Google Drive.');
+    } finally {
+      setDriveBackupBusy(false);
+    }
+  }
+
+  async function restoreFromDrive() {
+    if (!selectedDriveBackupId) return;
+    setDriveBackupBusy(true);
+    try {
+      const backup = await downloadDriveBackup(selectedDriveBackupId);
+      const selected = driveBackups.find((file) => file.id === selectedDriveBackupId);
+      const prompt = `Восстановить копию ${selected?.name ?? ''}?\n\n` +
+        `В ней ${backup.expenses.length} расходов и ${backup.categories.length} категорий.\n\n` +
+        'Все текущие расходы и категории на iPhone будут ЗАМЕНЕНЫ! Рекомендуется сначала создать свежую копию.';
+      if (!window.confirm(prompt)) return;
+      await restoreBackup(backup);
+      resetForm();
+      setNotice(`Восстановлено из Google Drive: ${backup.expenses.length} расходов.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'Не удалось восстановить копию из Google Drive.');
+    } finally {
+      setDriveBackupBusy(false);
+    }
   }
 
   async function exportBackup() {
@@ -329,7 +386,18 @@ export default function App() {
                 <button type="button" className="primary google-connect" disabled={googleBusy} onClick={() => void authorizeGoogle()}>{googleBusy ? 'Подключение…' : 'Подключить Google Drive'}</button>
               )}
               <p className="muted">Google запросит доступ только к файлам, созданным или открытым через Spending App. Токен действует временно и не сохраняется на устройстве.</p>
-              <p className="muted">На этом этапе проверяем авторизацию. Загрузка копий в Google Drive и экспорт в Google Sheets появятся позже.</p>
+              {googleConnected && isGoogleConnected() && <div className="drive-backup-actions">
+                <button type="button" className="primary google-connect" disabled={driveBackupBusy} onClick={() => void saveToDrive()}>{driveBackupBusy ? 'Выполняется операция…' : 'Создать копию в Google Drive'}</button>
+                <button type="button" className="update-check" disabled={driveBackupBusy} onClick={() => void refreshDriveBackups()}>Показать резервные копии</button>
+                {driveBackups.length > 0 && <>
+                  <label htmlFor="drive-backup-select">Копия для восстановления</label>
+                  <select id="drive-backup-select" value={selectedDriveBackupId} onChange={(event) => setSelectedDriveBackupId(event.target.value)}>
+                    {driveBackups.map((file) => <option key={file.id} value={file.id}>{new Date(file.createdTime).toLocaleString('ru-RU')} — {file.name}</option>)}
+                  </select>
+                  <button type="button" className="update-check" disabled={!selectedDriveBackupId || driveBackupBusy} onClick={() => void restoreFromDrive()}>Восстановить выбранную копию</button>
+                </>}
+              </div>}
+              <p className="muted">Резервные копии создаются только вручную и сохраняются отдельными JSON-файлами в папке Spending App. Google Sheets подключим следующим этапом.</p>
             </div>
             <details className="settings-categories">
               <summary className="settings-categories-toggle">
