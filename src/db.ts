@@ -22,7 +22,7 @@ class SpendingDatabase extends Dexie {
   categories!: EntityTable<Category, 'id'>;
 
   constructor() {
-    super('spending-app');
+    super(import.meta.env.VITE_PREVIEW_BUILD === 'true' ? 'spending-app-preview' : 'spending-app');
     this.version(1).stores({
       expenses: 'id, spentAt, categoryId, updatedAt',
       categories: 'id, name, archived',
