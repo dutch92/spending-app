@@ -69,7 +69,7 @@ export function StatisticsScreen({
         </div>
         <div className="stats-month-select picker-surface">
           <span className="picker-value" aria-hidden="true">{monthLabel}</span>
-          <span className="stats-month-chevron" aria-hidden="true">⌄</span>
+          <svg className="stats-month-chevron" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
           <input
             type="month"
             aria-label="Выбрать месяц статистики"
