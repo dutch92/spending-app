@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
       workbox: { navigateFallbackDenylist: preview ? [] : [/^\/spending-app\/preview\//] },
       manifest: {
         name: preview ? 'Spending App Preview' : 'Spending App',
@@ -23,7 +23,9 @@ export default defineConfig(({ mode }) => {
         theme_color: '#101c31',
         background_color: '#101c31',
         icons: [
-          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
       },
     }),
