@@ -374,3 +374,27 @@ input:focus,textarea:focus{border-color:var(--fp-accent)}
 @media(prefers-reduced-motion:reduce){
   .premium-expense-form .details-chevron{transition:none}
 }
+
+/* SVG month picker chevrons: precise vertical centering on iOS Safari. */
+.history-month-select,
+.stats-month-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 40px 0 14px;
+  min-height: 44px;
+}
+.history-month-chevron,
+.stats-month-chevron {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  transform: translateY(-50%);
+  display: block;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  pointer-events: none;
+  color: var(--fp-accent);
+}
