@@ -9,14 +9,105 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  actions: write
+
+# Serialize release attempts. A bot-created merge does not trigger another
+# push workflow, so we finish tagging and dispatch deployment ourselves.
+concurrency:
+  group: spending-app-release
+  cancel-in-progress: false
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
       - name: Create or update release PR
+        id: release
         uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      - name: Verify release PR identity and change scope
+        id: verify
+        if: ${{ steps.release.outputs.prs_created == 'true' && steps.release.outputs.pr != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_PR: ${{ steps.release.outputs.pr }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          number="$(printf '%s' "$RELEASE_PR" | jq -r '.number // empty')"
+          [[ "$number" =~ ^[0-9]+$ ]] || { echo "::error::No valid release PR number"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/pulls/$number" > /tmp/release-pr.json
+          author="$(jq -r '.user.login' /tmp/release-pr.json)"
+          branch="$(jq -r '.head.ref' /tmp/release-pr.json)"
+          base="$(jq -r '.base.ref' /tmp/release-pr.json)"
+          state="$(jq -r '.state' /tmp/release-pr.json)"
+          fork="$(jq -r '.head.repo.full_name' /tmp/release-pr.json)"
+          if [[ "$author" != 'github-actions[bot]' && "$author" != 'release-please[bot]' ]] ||
+             [[ "$branch" != release-please--* ]] ||
+             [[ "$base" != main ]] || [[ "$state" != open ]] ||
+             [[ "$fork" != "$GITHUB_REPOSITORY" ]]; then
+            echo "::error::Refusing unexpected PR: author=$author branch=$branch base=$base"
+            exit 1
+          fi
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$number/files?per_page=100" \
+            --jq '.[].filename' > /tmp/release-files.txt
+          # Only version metadata and release notes are allowed in an auto-merged PR.
+          if [[ ! -s /tmp/release-files.txt ]] ||
+             grep -Ev '^(package.json|package-lock.json|CHANGELOG.md|\.release-please-manifest.json)$' /tmp/release-files.txt; then
+            echo "::error::Unexpected files in release PR; refusing auto-merge"
+            exit 1
+          fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$(jq -r '.head.sha' /tmp/release-pr.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout release candidate
+        if: ${{ steps.verify.outputs.number != '' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.verify.outputs.head_sha }}
+          persist-credentials: false
+
+      - name: Set up Node
+        if: ${{ steps.verify.outputs.number != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check release candidate build
+        if: ${{ steps.verify.outputs.number != '' }}
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Merge verified release PR
+        if: ${{ steps.verify.outputs.number != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.verify.outputs.number }}
+          PR_SHA: ${{ steps.verify.outputs.head_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Avoid merging if the PR changed after we checked out its head.
+          current_sha="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" --jq '.head.sha')"
+          [[ "$current_sha" == "$PR_SHA" ]] || { echo "::error::Release PR changed during verification"; exit 1; }
+          gh pr merge "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --squash --match-head-commit "$PR_SHA"
+
+      - name: Create tag and GitHub Release for merged PR
+        if: ${{ steps.verify.outputs.number != '' }}
+        id: finalized-release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - name: Deploy merged release to Pages
+        if: ${{ steps.verify.outputs.number != '' && steps.finalized-release.outputs.release_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main
