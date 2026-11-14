@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import packageInfo from '../package.json';
 import { BottomNav, type AppTab } from './components/ui/BottomNav';
+import { AddExpenseScreen } from './components/screens/AddExpenseScreen';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
 import { downloadBackup, readBackupFile, restoreBackup } from './backup';
@@ -350,47 +351,27 @@ export default function App() {
       </header>
       <main>
         {tab === 'add' && (
-          <section className="panel expense-panel">
-            <h1>{editingId ? 'Изменить расход' : 'Новый расход'}</h1>
-            <form className="expense-form" onSubmit={saveExpense}>
-              <label htmlFor="amount">Сумма, ₽</label>
-              <input id="amount" className="amount" type="text" inputMode="decimal" autoComplete="off" placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
-              <div className="category-heading"><label>Категория</label>{activeCategories.length > 8 && <button className="text-button" type="button" onClick={() => setShowAllCategories((v) => !v)}>{showAllCategories ? 'Свернуть' : `Все (${activeCategories.length})`}</button>}</div>
-              <div className="category-grid">
-                {visibleCategories.map((c) => (
-                  <button key={c.id} type="button" className={'category ' + (categoryId === c.id ? 'selected' : '')} onClick={() => setCategoryId(c.id)}>
-                    <span className="emoji">{c.icon}</span><span>{c.name}</span>
-                  </button>
-                ))}
-              </div>
-              <button className="primary save-expense" type="submit" disabled={busy || !parseKopecks(amount) || !categoryId || !spentAt}>{busy ? 'Сохраняем…' : editingId ? 'Сохранить изменения' : 'Сохранить расход'}</button>
-              <button className="details-toggle" type="button" aria-expanded={showDetails} onClick={() => setShowDetails((v) => !v)}>
-                <span>{showDetails ? 'Скрыть дополнительные поля' : 'Комментарий, дата и время'}</span>
-                <span aria-hidden="true">{showDetails ? '⌃' : '⌄'}</span>
-              </button>
-              {showDetails && <div className="expense-details">
-                <label htmlFor="comment">Комментарий (необязательно)</label>
-                <textarea id="comment" rows={2} placeholder="На что потратили?" value={comment} onChange={(e) => setComment(e.target.value)} />
-                <div className="date-time-grid">
-                  <div className="date-time-field">
-                    <label htmlFor="spent-date">Дата</label>
-                    <div className="picker-surface">
-                      <span className="picker-value" aria-hidden="true">{spentAt.slice(0, 10) ? new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(spentAt.slice(0, 10) + 'T12:00:00')) : 'Выбрать дату'}</span>
-                      <input id="spent-date" aria-label="Дата расхода" type="date" value={spentAt.slice(0, 10)} onChange={(e) => setSpentAt(`${e.target.value}T${spentAt.slice(11, 16)}`)} />
-                    </div>
-                  </div>
-                  <div className="date-time-field">
-                    <label htmlFor="spent-time">Время</label>
-                    <div className="picker-surface">
-                      <span className="picker-value" aria-hidden="true">{spentAt.slice(11, 16) || 'Выбрать время'}</span>
-                      <input id="spent-time" aria-label="Время расхода" type="time" value={spentAt.slice(11, 16)} onChange={(e) => setSpentAt(`${spentAt.slice(0, 10)}T${e.target.value}`)} />
-                    </div>
-                  </div>
-                </div>
-              </div>}
-              {editingId && <button className="secondary" type="button" onClick={resetForm}>Отменить редактирование</button>}
-            </form>
-          </section>
+          <AddExpenseScreen
+            amount={amount}
+            categoryId={categoryId}
+            visibleCategories={visibleCategories}
+            activeCategoryCount={activeCategories.length}
+            showAllCategories={showAllCategories}
+            showDetails={showDetails}
+            comment={comment}
+            spentAt={spentAt}
+            editing={Boolean(editingId)}
+            busy={busy}
+            canSave={Boolean(parseKopecks(amount) && categoryId && spentAt)}
+            onAmountChange={setAmount}
+            onCategoryChange={setCategoryId}
+            onToggleCategories={() => setShowAllCategories((value) => !value)}
+            onToggleDetails={() => setShowDetails((value) => !value)}
+            onCommentChange={setComment}
+            onSpentAtChange={setSpentAt}
+            onCancelEdit={resetForm}
+            onSubmit={saveExpense}
+          />
         )}
         {tab === 'history' && (
           <section>
