@@ -3,6 +3,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import packageInfo from '../package.json';
 import { BottomNav, type AppTab } from './components/ui/BottomNav';
 import { AddExpenseScreen } from './components/screens/AddExpenseScreen';
+import { HistoryScreen } from './components/screens/HistoryScreen';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
 import { downloadBackup, readBackupFile, restoreBackup } from './backup';
@@ -380,28 +381,17 @@ export default function App() {
           />
         )}
         {tab === 'history' && (
-          <section>
-            <h1>История расходов</h1>
-            <label htmlFor="history-month">Месяц</label>
-            <div className="picker-surface month-picker">
-              <span className="picker-value" aria-hidden="true">{monthLabel(selectedMonth)}</span>
-              <input id="history-month" aria-label="Выбрать месяц" type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
-            </div>
-            <div className="summary"><span>За {monthLabel(selectedMonth)}</span><strong>{money(total)}</strong></div>
-            {groups.length === 0 ? empty : groups.map(([day, rows]) => (
-              <div key={day} className="day-group">
-                <div className="day-header"><strong>{new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' }).format(new Date(day + 'T12:00:00'))}</strong><strong>{money(rows.reduce((sum, e) => sum + e.amountKopecks, 0))}</strong></div>
-                {rows.map((e) => (
-                  <div className="expense" key={e.id}>
-                    <span className="expense-icon">{categoryMap.get(e.categoryId)?.icon ?? '🏷️'}</span>
-                    <button className="expense-info" onClick={() => startEdit(e)}><strong>{categoryMap.get(e.categoryId)?.name ?? 'Удалённая категория'}</strong><span>{e.comment || new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(new Date(e.spentAt))}</span></button>
-                    <strong>{money(e.amountKopecks)}</strong>
-                    <button className="delete" aria-label="Удалить расход" onClick={() => void removeExpense(e.id)}>×</button>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </section>
+          <HistoryScreen
+            selectedMonth={selectedMonth}
+            monthLabel={monthLabel(selectedMonth)}
+            totalLabel={money(total)}
+            groups={groups}
+            categoryMap={categoryMap}
+            onMonthChange={setSelectedMonth}
+            onEdit={startEdit}
+            onDelete={(id) => void removeExpense(id)}
+            formatMoney={money}
+          />
         )}
         {tab === 'stats' && (
           <section>
