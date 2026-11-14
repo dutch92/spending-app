@@ -9,6 +9,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['icon.svg'],
+      workbox: { navigateFallbackDenylist: [/^\/spending-app\/preview\//] },
       manifest: {
         name: 'Spending App',
         short_name: 'Spending',
