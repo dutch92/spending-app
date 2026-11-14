@@ -62,6 +62,7 @@ export function AddExpenseScreen({
             <input
               id="amount"
               className="amount"
+              style={{ width: `${Math.max(1, Math.min(12, amount.length || 1)) + 0.5}ch` }}
               type="text"
               inputMode="decimal"
               autoComplete="off"
