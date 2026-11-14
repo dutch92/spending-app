@@ -104,3 +104,80 @@ input:focus,textarea:focus{border-color:var(--fp-accent)}
 @media(prefers-reduced-motion:reduce){
   .category,.expense-form .category,.primary,.expense-form .save-expense,.bottom-nav button{transition:none}
 }
+
+/* Stage 2 — quick expense entry, optimized for a narrow iPhone viewport. */
+.add-expense-screen{display:flex;flex-direction:column;gap:14px;min-width:0;padding:4px 0 12px}
+.add-expense-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 3px 0}
+.add-expense-heading h1{margin:3px 0 0;font-size:24px;line-height:1.2}
+.add-expense-eyebrow{color:var(--fp-muted);font-size:10px;font-weight:700;letter-spacing:.12em}
+.add-expense-heading-icon{
+  display:grid;place-items:center;width:42px;height:42px;flex-shrink:0;
+  background:var(--fp-surface);border:1px solid var(--fp-stroke);
+  border-radius:14px;color:var(--fp-accent);font-size:23px;font-weight:700;
+}
+.premium-expense-form{gap:12px}
+.amount-card{
+  background:var(--fp-surface);border:1px solid var(--fp-stroke);
+  border-radius:var(--fp-radius-lg);padding:18px 16px 15px;
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+}
+.amount-card>label{font-size:13px;color:var(--fp-muted);font-weight:500;margin:0}
+.amount-entry{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-width:0}
+.premium-expense-form .amount{
+  display:block;width:100%;max-width:260px;min-width:0;height:56px;
+  border:0;border-radius:0;background:transparent;padding:0;
+  color:var(--fp-text);font-size:36px;line-height:1.15;font-weight:750;
+  text-align:right;letter-spacing:-.035em;font-variant-numeric:tabular-nums;
+}
+.premium-expense-form .amount:focus{border:0}
+.premium-expense-form .amount:focus-visible{outline-offset:3px;border-radius:7px}
+.premium-expense-form .amount::placeholder{color:#778ba7}
+.amount-currency{color:var(--fp-text);font-size:29px;font-weight:650;line-height:1;flex-shrink:0}
+.amount-date{font-size:12px;color:var(--fp-accent)}
+.premium-expense-form .category-heading{margin-top:1px;min-height:28px}
+.premium-expense-form .category-heading label{font-size:14px;color:var(--fp-text);font-weight:700}
+.premium-expense-form .category-heading .text-button{font-size:12px;font-weight:650;min-height:32px}
+.premium-expense-form .category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.premium-expense-form .category{
+  min-height:76px;padding:8px 3px;gap:7px;
+  border:1px solid var(--fp-stroke);border-radius:15px;
+  background:var(--fp-surface);font-size:11px;line-height:1.15;
+}
+.premium-expense-form .category.selected{background:#294a4a;border-color:var(--fp-accent);box-shadow:inset 0 0 0 1px var(--fp-accent)}
+.premium-expense-form .emoji{font-size:23px;line-height:1.15}
+.premium-expense-form .category span:last-child{max-width:100%;overflow-wrap:anywhere}
+.expense-extras{
+  border:1px solid var(--fp-stroke);background:var(--fp-surface);
+  border-radius:var(--fp-radius-md);overflow:hidden;
+}
+.premium-expense-form .details-toggle{
+  min-height:49px;display:flex;align-items:center;justify-content:flex-start;
+  gap:10px;padding:12px 14px;color:var(--fp-muted);font-size:13px;font-weight:500;
+}
+.premium-expense-form .details-toggle>span:first-child{font-size:20px;line-height:1}
+.premium-expense-form .details-chevron{margin-left:auto;color:var(--fp-accent);font-size:17px}
+.premium-expense-form .expense-details{padding:0 14px 14px;gap:8px}
+.premium-expense-form .expense-details label{font-size:12px}
+.premium-expense-form .expense-details textarea{min-height:64px}
+.premium-expense-form .picker-surface{background:var(--fp-bg);border-color:var(--fp-stroke)}
+.premium-expense-form .picker-surface:focus-within{outline-color:var(--fp-accent)}
+.premium-expense-form .save-expense{
+  width:100%;min-height:54px;height:auto;margin:1px 0 0;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:13px 16px;font-size:15px;box-shadow:0 5px 18px #0a151e45;
+}
+.premium-expense-form .save-expense:disabled{opacity:.46;box-shadow:none;cursor:not-allowed}
+.premium-expense-form .save-expense>span:first-child{font-size:20px}
+.cancel-expense-edit{min-height:44px;color:var(--fp-text)}
+@media(max-width:360px){
+  .premium-expense-form .category-grid{gap:5px}
+  .premium-expense-form .category{min-height:69px;padding:7px 2px;font-size:10px}
+  .premium-expense-form .emoji{font-size:20px}
+  .premium-expense-form .amount{font-size:32px;max-width:230px}
+}
+@media(max-height:700px){
+  .add-expense-screen{gap:9px}
+  .amount-card{padding:12px 12px 10px}
+  .premium-expense-form .category{min-height:62px;gap:3px}
+  .premium-expense-form .amount{height:47px}
+}
