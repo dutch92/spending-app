@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/dutch92/spending-app/compare/spending-app-v0.5.0...spending-app-v0.5.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* remove decorative ruble tile and use centered SVG details chevron ([b285bd4](https://github.com/dutch92/spending-app/commit/b285bd43575426fe8485f2c8032526c6a0679bf1))
+
 ## [0.5.0](https://github.com/dutch92/spending-app/compare/spending-app-v0.4.2...spending-app-v0.5.0) (2026-11-14)
 
 
