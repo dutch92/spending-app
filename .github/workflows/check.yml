@@ -18,5 +18,9 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Typecheck and build
+      - name: Typecheck and build standard app
+        run: npm run build
+      - name: Typecheck and build isolated preview
+        env:
+          VITE_PREVIEW_BUILD: 'true'
         run: npm run build
