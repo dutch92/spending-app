@@ -342,7 +342,6 @@ export default function App() {
     }
   }
 
-  const empty = <p className="muted empty">Пока нет расходов за выбранный месяц.</p>;
   return (
     <div className="app">
       <header className="topbar">
