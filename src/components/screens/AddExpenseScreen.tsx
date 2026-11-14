@@ -52,7 +52,6 @@ export function AddExpenseScreen({
           <span className="add-expense-eyebrow">БЫСТРАЯ ЗАПИСЬ</span>
           <h1>{editing ? 'Изменить расход' : 'Новый расход'}</h1>
         </div>
-        <span className="add-expense-heading-icon" aria-hidden="true">₽</span>
       </div>
 
       <form className="expense-form premium-expense-form" onSubmit={onSubmit}>
@@ -109,7 +108,9 @@ export function AddExpenseScreen({
           >
             <span aria-hidden="true">☷</span>
             <span>{showDetails ? 'Скрыть дополнительные поля' : 'Комментарий, дата и время'}</span>
-            <span className="details-chevron" aria-hidden="true">{showDetails ? '⌃' : '⌄'}</span>
+            <svg className={`details-chevron${showDetails ? ' details-chevron--open' : ''}`} viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
           {showDetails && (
             <div className="expense-details" id="expense-extra-fields">
