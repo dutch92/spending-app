@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/dutch92/spending-app/compare/spending-app-v0.4.0...spending-app-v0.4.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* exclude preview route from production PWA navigation fallback ([a898508](https://github.com/dutch92/spending-app/commit/a89850801693920069022af7ab7d8ee6dcc13541))
+
 ## [0.4.0](https://github.com/dutch92/spending-app/compare/spending-app-v0.3.1...spending-app-v0.4.0) (2026-11-14)
 
 
