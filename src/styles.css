@@ -127,3 +127,72 @@ main>section{min-width:0;max-width:100%}
 .custom-category-icon button{flex-shrink:0}
 .category-icon-cancel{display:block;margin:10px auto 0;border:0;background:transparent;color:#667085;padding:8px 14px}
 @media(max-width:360px){.category-icon-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.settings-categories .category-settings-item .setting-row{gap:3px}}
+
+/* Animated toast: entrance/exit and a visible five-second countdown ring. */
+.notice-toast{
+  position:fixed;
+  bottom:calc(85px + env(safe-area-inset-bottom));
+  left:50%;
+  transform:translate(-50%,0);
+  width:max-content;
+  max-width:min(420px,calc(100vw - 24px));
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:11px 11px 11px 16px;
+  border-radius:16px;
+  background:#172033;
+  color:#fff;
+  box-shadow:0 10px 30px #17203338;
+  z-index:21;
+  font-size:14px;
+  line-height:1.35;
+  animation:toast-enter .3s cubic-bezier(.2,.8,.2,1) both;
+}
+.notice-toast--exit{animation:toast-exit .26s ease-in both}
+.notice-toast__message{min-width:0;overflow-wrap:anywhere}
+.notice-toast__dismiss{
+  border:0;
+  background:transparent;
+  color:#fff;
+  width:38px;
+  height:38px;
+  padding:0;
+  flex-shrink:0;
+  display:grid;
+  place-items:center;
+  position:relative;
+  border-radius:50%;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.notice-toast__dismiss:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
+.notice-toast__timer{position:absolute;inset:1px;transform:rotate(-90deg);overflow:visible}
+.notice-toast__track,.notice-toast__progress{fill:none;stroke-width:3.2}
+.notice-toast__track{stroke:#ffffff35}
+.notice-toast__progress{
+  stroke:#93c5fd;
+  stroke-linecap:round;
+  stroke-dasharray:100.531;
+  stroke-dashoffset:0;
+  animation:toast-countdown 5s linear forwards;
+}
+.notice-toast__close{font-size:23px;line-height:1;position:relative;top:-1px}
+@keyframes toast-enter{
+  from{opacity:0;transform:translate(-50%,16px) scale(.97)}
+  to{opacity:1;transform:translate(-50%,0) scale(1)}
+}
+@keyframes toast-exit{
+  from{opacity:1;transform:translate(-50%,0) scale(1)}
+  to{opacity:0;transform:translate(-50%,10px) scale(.98)}
+}
+@keyframes toast-countdown{
+  to{stroke-dashoffset:100.531}
+}
+@media(max-width:480px){
+  .notice-toast{bottom:calc(72px + env(safe-area-inset-bottom))}
+}
+@media(prefers-reduced-motion:reduce){
+  .notice-toast,.notice-toast--exit{animation:none}
+  .notice-toast__progress{animation:none;stroke-dashoffset:100.531}
+}
