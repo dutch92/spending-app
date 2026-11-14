@@ -54,6 +54,12 @@ jobs:
         run: |
           mkdir -p dist/preview
           cp -a preview-src/dist/. dist/preview/
+      - name: Report published application paths
+        run: |
+          echo "## Spending App deployments" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Main: https://dutch92.github.io/spending-app/" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Preview: https://dutch92.github.io/spending-app/preview/" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Preview branch: feature/fintech-premium-dark" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
