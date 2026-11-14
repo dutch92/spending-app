@@ -1,11 +1,11 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-const preview = process.env.VITE_PREVIEW_BUILD === 'true';
-const appBase = preview ? '/spending-app/preview/' : '/spending-app/';
-
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const preview = loadEnv(mode, '.', 'VITE_').VITE_PREVIEW_BUILD === 'true';
+  const appBase = preview ? '/spending-app/preview/' : '/spending-app/';
+  return {
   base: appBase,
   plugins: [
     react(),
@@ -28,4 +28,5 @@ export default defineConfig({
       },
     }),
   ],
+  };
 });
