@@ -227,9 +227,14 @@ export default function App() {
     try {
       const result = await uploadDriveBackup();
       setNotice(`Google Drive: сохранена копия с ${result.expenses} расходами.`);
-      const files = await listDriveBackups();
-      setDriveBackups(files);
-      setSelectedDriveBackupId(result.id);
+      try {
+        const files = await listDriveBackups();
+        setDriveBackups(files);
+        setSelectedDriveBackupId(result.id);
+      } catch {
+        // Upload succeeded even if refreshing the backup list failed.
+        setNotice(`Копия сохранена в Google Drive (${result.expenses} расходов), но список копий не обновился.`);
+      }
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Не удалось сохранить копию в Google Drive.');
     } finally {
