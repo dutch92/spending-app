@@ -1,0 +1,22 @@
+/* Fintech Premium Dark — shared design tokens. */
+:root {
+  color-scheme: dark;
+  --fp-bg: #101c31;
+  --fp-surface: #20334f;
+  --fp-elevated: #2d4260;
+  --fp-stroke: #354b67;
+  --fp-accent: #b9f3dd;
+  --fp-accent-ink: #143b36;
+  --fp-text: #fff;
+  --fp-muted: #a9bdd6;
+  --fp-danger: #ff9d9d;
+  --fp-radius-sm: 12px;
+  --fp-radius-md: 16px;
+  --fp-radius-lg: 20px;
+  --fp-space-1: 4px;
+  --fp-space-2: 8px;
+  --fp-space-3: 12px;
+  --fp-space-4: 16px;
+  --fp-space-6: 24px;
+  --fp-motion: 180ms ease;
+}
