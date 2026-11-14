@@ -4,7 +4,9 @@
   "version": "0.6.1",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/generate-icons.mjs",
     "dev": "vite --host",
+    "prebuild": "node scripts/generate-icons.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
