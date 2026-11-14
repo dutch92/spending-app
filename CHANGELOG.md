@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/dutch92/spending-app/compare/spending-app-v0.3.1...spending-app-v0.4.0) (2026-11-14)
+
+
+### Features
+
+* add timed animated toast with circular countdown and close action ([45fdfbb](https://github.com/dutch92/spending-app/commit/45fdfbbdde216e702bcb4d283830d0a8312b69b5))
+
 ## [0.3.1](https://github.com/dutch92/spending-app/compare/spending-app-v0.3.0...spending-app-v0.3.1) (2026-11-14)
 
 
