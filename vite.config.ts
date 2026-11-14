@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => {
         start_url: appBase,
         scope: appBase,
         display: 'standalone',
-        theme_color: preview ? '#101c31' : '#f7f8fa',
-        background_color: preview ? '#101c31' : '#f7f8fa',
+        theme_color: '#101c31',
+        background_color: '#101c31',
         icons: [
           { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
         ],
