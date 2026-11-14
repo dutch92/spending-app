@@ -326,3 +326,33 @@ input:focus,textarea:focus{border-color:var(--fp-accent)}
   .settings-category-section .setting-row{gap:5px}
   .settings-category-section .setting-row button:not(.category-icon-button){padding:7px}
 }
+
+/* Keep the month picker label and chevron aligned on iPhone Safari. */
+.history-month-select,
+.stats-month-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 38px 0 14px;
+  min-height: 44px;
+}
+.history-month-select .picker-value,
+.stats-month-select .picker-value {
+  display: block;
+  line-height: 1.2;
+}
+.history-month-chevron,
+.stats-month-chevron {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  line-height: 1;
+  pointer-events: none;
+  color: var(--fp-accent);
+}
