@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/dutch92/spending-app/compare/spending-app-v0.4.2...spending-app-v0.5.0) (2026-11-14)
+
+
+### Features
+
+* ship Fintech Premium Dark redesign ([#3](https://github.com/dutch92/spending-app/issues/3)) ([8008fd2](https://github.com/dutch92/spending-app/commit/8008fd2d420ea6d499d3168ef0847ef4bfe606da))
+
 ## [0.4.2](https://github.com/dutch92/spending-app/compare/spending-app-v0.4.1...spending-app-v0.4.2) (2026-11-14)
 
 
