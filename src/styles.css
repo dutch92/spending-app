@@ -111,3 +111,19 @@ main>section{min-width:0;max-width:100%}
 .drive-backup-actions .google-connect,.drive-backup-actions .update-check{width:100%;margin:0;min-height:46px}
 .drive-backup-actions label{font-size:13px;margin:4px 0 0}
 .drive-backup-actions select{display:block;box-sizing:border-box;width:100%;max-width:100%;min-width:0;background:#f8f9fb;border:1px solid #dee2eb;border-radius:12px;padding:12px;font-size:14px;color:#172033}
+
+/* Inline icon picker for category settings */
+.category-settings-item{border-top:1px solid #f0f1f4}
+.settings-categories .category-settings-item .setting-row{border-top:0}
+.category-setting-name{flex:1;min-width:0;overflow-wrap:anywhere}
+.category-icon-button{width:40px;height:40px;min-width:40px;padding:0!important;display:grid;place-items:center;font-size:23px!important;line-height:1;border:1px solid #dce4f0!important;border-radius:12px!important;background:#f5f8ff!important;cursor:pointer}
+.category-icon-picker{padding:12px;margin:0 0 10px;border:1px solid #e4e7ed;border-radius:12px;background:#f8f9fc;min-width:0}
+.category-icon-picker .muted{margin:0 0 10px;font-size:13px}
+.category-icon-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+.category-icon-grid button{display:grid;place-items:center;min-width:0;min-height:42px;padding:2px;border:1px solid #e1e7f0;border-radius:10px;background:white;font-size:24px;cursor:pointer}
+.category-icon-grid button.selected{background:#e7efff;border:2px solid #2563eb}
+.custom-category-icon{display:flex;gap:8px;margin-top:12px}
+.custom-category-icon input{min-width:0;flex:1;font-size:16px}
+.custom-category-icon button{flex-shrink:0}
+.category-icon-cancel{display:block;margin:10px auto 0;border:0;background:transparent;color:#667085;padding:8px 14px}
+@media(max-width:360px){.category-icon-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.settings-categories .category-settings-item .setting-row{gap:3px}}
