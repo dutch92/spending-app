@@ -356,3 +356,21 @@ input:focus,textarea:focus{border-color:var(--fp-accent)}
   pointer-events: none;
   color: var(--fp-accent);
 }
+
+/* Align the extra-fields chevron geometrically; avoid font glyph baseline offsets. */
+.premium-expense-form .details-toggle{display:flex;align-items:center}
+.premium-expense-form .details-chevron{
+  display:block;
+  width:20px;
+  height:20px;
+  flex:0 0 20px;
+  margin-left:auto;
+  color:var(--fp-accent);
+  transform:rotate(0deg);
+  transform-origin:center;
+  transition:transform var(--fp-motion);
+}
+.premium-expense-form .details-chevron--open{transform:rotate(180deg)}
+@media(prefers-reduced-motion:reduce){
+  .premium-expense-form .details-chevron{transition:none}
+}
