@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import packageInfo from '../package.json';
+import { BottomNav, type AppTab } from './components/ui/BottomNav';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
 import { downloadBackup, readBackupFile, restoreBackup } from './backup';
@@ -18,7 +19,6 @@ const CATEGORY_ICONS = [
   '💳', '💰', '🏦', '🧰', '🛠️', '🐶', '🐱', '✨',
 ];
 
-type Tab = 'add' | 'history' | 'stats' | 'settings';
 const money = (kopecks: number) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(kopecks / 100);
 const localDateTime = (date: Date) => {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
@@ -68,7 +68,7 @@ function NoticeToast({ message, onDismiss }: { message: string; onDismiss: () =>
 export default function App() {
   const expenses = useLiveQuery(() => db.expenses.orderBy('spentAt').reverse().toArray(), []) ?? [];
   const categories = useLiveQuery(() => db.categories.toArray(), []) ?? [];
-  const [tab, setTab] = useState<Tab>('add');
+  const [tab, setTab] = useState<AppTab>('add');
   const [amount, setAmount] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [comment, setComment] = useState('');
@@ -343,7 +343,11 @@ export default function App() {
   const empty = <p className="muted empty">Пока нет расходов за выбранный месяц.</p>;
   return (
     <div className="app">
-      <header className="topbar"><span className="logo">◉</span><strong>Spending App</strong><span className="topbar-right">Локально на iPhone</span></header>
+      <header className="topbar">
+        <div className="brand-mark" aria-hidden="true">◈</div>
+        <div className="brand-copy"><strong>Spending App</strong><span>Личный учёт расходов</span></div>
+        <span className="topbar-right">FINTECH PREMIUM</span>
+      </header>
       <main>
         {tab === 'add' && (
           <section className="panel expense-panel">
@@ -512,11 +516,7 @@ export default function App() {
         </div>}
         {notice && <NoticeToast key={notice} message={notice} onDismiss={() => setNotice('')} />}
       </main>
-      <nav className="bottom-nav" aria-label="Навигация">
-        {([{id:'add',icon:'＋',name:'Добавить'},{id:'history',icon:'☷',name:'История'},{id:'stats',icon:'▥',name:'Статистика'},{id:'settings',icon:'⚙',name:'Настройки'}] as const).map((item) =>
-          <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); setNotice(''); }}><span>{item.icon}</span><small>{item.name}</small></button>
-        )}
-      </nav>
+      <BottomNav active={tab} onChange={(next) => { setTab(next); setNotice(''); }} />
     </div>
   );
 }
