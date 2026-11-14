@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import packageInfo from '../package.json';
+import { BottomNav, type AppTab } from './components/ui/BottomNav';
+import { AddExpenseScreen } from './components/screens/AddExpenseScreen';
+import { HistoryScreen } from './components/screens/HistoryScreen';
+import { StatisticsScreen } from './components/screens/StatisticsScreen';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
 import { downloadBackup, readBackupFile, restoreBackup } from './backup';
@@ -18,7 +22,6 @@ const CATEGORY_ICONS = [
   '💳', '💰', '🏦', '🧰', '🛠️', '🐶', '🐱', '✨',
 ];
 
-type Tab = 'add' | 'history' | 'stats' | 'settings';
 const money = (kopecks: number) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(kopecks / 100);
 const localDateTime = (date: Date) => {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
@@ -68,7 +71,7 @@ function NoticeToast({ message, onDismiss }: { message: string; onDismiss: () =>
 export default function App() {
   const expenses = useLiveQuery(() => db.expenses.orderBy('spentAt').reverse().toArray(), []) ?? [];
   const categories = useLiveQuery(() => db.categories.toArray(), []) ?? [];
-  const [tab, setTab] = useState<Tab>('add');
+  const [tab, setTab] = useState<AppTab>('add');
   const [amount, setAmount] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [comment, setComment] = useState('');
@@ -166,7 +169,6 @@ export default function App() {
   const dailyTotals = groups.map(([day, rows]) => ({
     day, total: rows.reduce((sum, e) => sum + e.amountKopecks, 0),
   })).reverse();
-  const maxDay = Math.max(1, ...dailyTotals.map((day) => day.total));
 
   function resetForm() {
     setAmount(''); setCategoryId(''); setComment(''); setSpentAt(localDateTime(new Date())); setEditingId(null); setShowDetails(false); setShowAllCategories(false);
@@ -340,101 +342,83 @@ export default function App() {
     }
   }
 
-  const empty = <p className="muted empty">Пока нет расходов за выбранный месяц.</p>;
   return (
     <div className="app">
-      <header className="topbar"><span className="logo">◉</span><strong>Spending App</strong><span className="topbar-right">Локально на iPhone</span></header>
+      <header className="topbar">
+        <div className="brand-mark" aria-hidden="true">◈</div>
+        <div className="brand-copy"><strong>Spending App</strong><span>Личный учёт расходов</span></div>
+        <span className="topbar-right">FINTECH PREMIUM</span>
+      </header>
       <main>
+        {import.meta.env.VITE_PREVIEW_BUILD === 'true' && (
+          <div className="preview-notice" role="status">
+            <strong>Тестовая версия Fintech Premium Dark</strong>
+            <span>Здесь отдельная база расходов. Данные основного приложения не изменяются.</span>
+          </div>
+        )}
         {tab === 'add' && (
-          <section className="panel expense-panel">
-            <h1>{editingId ? 'Изменить расход' : 'Новый расход'}</h1>
-            <form className="expense-form" onSubmit={saveExpense}>
-              <label htmlFor="amount">Сумма, ₽</label>
-              <input id="amount" className="amount" type="text" inputMode="decimal" autoComplete="off" placeholder="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
-              <div className="category-heading"><label>Категория</label>{activeCategories.length > 8 && <button className="text-button" type="button" onClick={() => setShowAllCategories((v) => !v)}>{showAllCategories ? 'Свернуть' : `Все (${activeCategories.length})`}</button>}</div>
-              <div className="category-grid">
-                {visibleCategories.map((c) => (
-                  <button key={c.id} type="button" className={'category ' + (categoryId === c.id ? 'selected' : '')} onClick={() => setCategoryId(c.id)}>
-                    <span className="emoji">{c.icon}</span><span>{c.name}</span>
-                  </button>
-                ))}
-              </div>
-              <button className="primary save-expense" type="submit" disabled={busy || !parseKopecks(amount) || !categoryId || !spentAt}>{busy ? 'Сохраняем…' : editingId ? 'Сохранить изменения' : 'Сохранить расход'}</button>
-              <button className="details-toggle" type="button" aria-expanded={showDetails} onClick={() => setShowDetails((v) => !v)}>
-                <span>{showDetails ? 'Скрыть дополнительные поля' : 'Комментарий, дата и время'}</span>
-                <span aria-hidden="true">{showDetails ? '⌃' : '⌄'}</span>
-              </button>
-              {showDetails && <div className="expense-details">
-                <label htmlFor="comment">Комментарий (необязательно)</label>
-                <textarea id="comment" rows={2} placeholder="На что потратили?" value={comment} onChange={(e) => setComment(e.target.value)} />
-                <div className="date-time-grid">
-                  <div className="date-time-field">
-                    <label htmlFor="spent-date">Дата</label>
-                    <div className="picker-surface">
-                      <span className="picker-value" aria-hidden="true">{spentAt.slice(0, 10) ? new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(spentAt.slice(0, 10) + 'T12:00:00')) : 'Выбрать дату'}</span>
-                      <input id="spent-date" aria-label="Дата расхода" type="date" value={spentAt.slice(0, 10)} onChange={(e) => setSpentAt(`${e.target.value}T${spentAt.slice(11, 16)}`)} />
-                    </div>
-                  </div>
-                  <div className="date-time-field">
-                    <label htmlFor="spent-time">Время</label>
-                    <div className="picker-surface">
-                      <span className="picker-value" aria-hidden="true">{spentAt.slice(11, 16) || 'Выбрать время'}</span>
-                      <input id="spent-time" aria-label="Время расхода" type="time" value={spentAt.slice(11, 16)} onChange={(e) => setSpentAt(`${spentAt.slice(0, 10)}T${e.target.value}`)} />
-                    </div>
-                  </div>
-                </div>
-              </div>}
-              {editingId && <button className="secondary" type="button" onClick={resetForm}>Отменить редактирование</button>}
-            </form>
-          </section>
+          <AddExpenseScreen
+            amount={amount}
+            categoryId={categoryId}
+            visibleCategories={visibleCategories}
+            activeCategoryCount={activeCategories.length}
+            showAllCategories={showAllCategories}
+            showDetails={showDetails}
+            comment={comment}
+            spentAt={spentAt}
+            editing={Boolean(editingId)}
+            busy={busy}
+            canSave={Boolean(parseKopecks(amount) && categoryId && spentAt)}
+            onAmountChange={setAmount}
+            onCategoryChange={setCategoryId}
+            onToggleCategories={() => setShowAllCategories((value) => !value)}
+            onToggleDetails={() => setShowDetails((value) => !value)}
+            onCommentChange={setComment}
+            onSpentAtChange={setSpentAt}
+            onCancelEdit={resetForm}
+            onSubmit={saveExpense}
+          />
         )}
         {tab === 'history' && (
-          <section>
-            <h1>История расходов</h1>
-            <label htmlFor="history-month">Месяц</label>
-            <div className="picker-surface month-picker">
-              <span className="picker-value" aria-hidden="true">{monthLabel(selectedMonth)}</span>
-              <input id="history-month" aria-label="Выбрать месяц" type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
-            </div>
-            <div className="summary"><span>За {monthLabel(selectedMonth)}</span><strong>{money(total)}</strong></div>
-            {groups.length === 0 ? empty : groups.map(([day, rows]) => (
-              <div key={day} className="day-group">
-                <div className="day-header"><strong>{new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' }).format(new Date(day + 'T12:00:00'))}</strong><strong>{money(rows.reduce((sum, e) => sum + e.amountKopecks, 0))}</strong></div>
-                {rows.map((e) => (
-                  <div className="expense" key={e.id}>
-                    <span className="expense-icon">{categoryMap.get(e.categoryId)?.icon ?? '🏷️'}</span>
-                    <button className="expense-info" onClick={() => startEdit(e)}><strong>{categoryMap.get(e.categoryId)?.name ?? 'Удалённая категория'}</strong><span>{e.comment || new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(new Date(e.spentAt))}</span></button>
-                    <strong>{money(e.amountKopecks)}</strong>
-                    <button className="delete" aria-label="Удалить расход" onClick={() => void removeExpense(e.id)}>×</button>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </section>
+          <HistoryScreen
+            selectedMonth={selectedMonth}
+            monthLabel={monthLabel(selectedMonth)}
+            totalLabel={money(total)}
+            groups={groups}
+            categoryMap={categoryMap}
+            onMonthChange={setSelectedMonth}
+            onEdit={startEdit}
+            onDelete={(id) => void removeExpense(id)}
+            formatMoney={money}
+          />
         )}
         {tab === 'stats' && (
-          <section>
-            <h1>Статистика</h1>
-            <label htmlFor="stats-month">Месяц</label>
-            <div className="picker-surface month-picker">
-              <span className="picker-value" aria-hidden="true">{monthLabel(selectedMonth)}</span>
-              <input id="stats-month" aria-label="Выбрать месяц" type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
-            </div>
-            <div className="summary"><span>Всего за месяц</span><strong>{money(total)}</strong><small>Предыдущий месяц: {money(previousTotal)}{previousTotal > 0 ? ' · ' + ((total - previousTotal) / previousTotal * 100).toFixed(1) + '%' : ''}</small></div>
-            <h2>По категориям</h2>
-            {categoryTotals.length ? categoryTotals.map(([id, sum]) => (
-              <div key={id} className="stat-row"><div><span>{categoryMap.get(id)?.icon} {categoryMap.get(id)?.name ?? 'Категория'}</span><strong>{money(sum)}</strong></div><div className="track"><span style={{ width: total ? (sum / total * 100) + '%' : '0%' }} /></div></div>
-            )) : empty}
-            <h2>Динамика по дням</h2>
-            {dailyTotals.length ? (
-              <div className="day-chart">{dailyTotals.map(({day, total: value}) => <div className="day-col" key={day} title={day + ': ' + money(value)}><div className="day-bar" style={{ height: Math.max(3, value / maxDay * 110) + 'px' }} /><small>{Number(day.slice(-2))}</small></div>)}</div>
-            ) : empty}
-          </section>
+          <StatisticsScreen
+            selectedMonth={selectedMonth}
+            monthLabel={monthLabel(selectedMonth)}
+            total={total}
+            previousTotal={previousTotal}
+            categoryTotals={categoryTotals}
+            dailyTotals={dailyTotals}
+            categoryMap={categoryMap}
+            onMonthChange={setSelectedMonth}
+            formatMoney={money}
+          />
         )}
         {tab === 'settings' && (
-          <section>
-            <h1>Настройки</h1>
-            <h2>Резервное копирование</h2>
+          <section className="premium-settings">
+            <header className="premium-settings-header">
+              <span className="premium-settings-eyebrow">УПРАВЛЕНИЕ ПРИЛОЖЕНИЕМ</span>
+              <h1>Настройки</h1>
+            </header>
+            <section className="settings-section settings-backup-section" aria-labelledby="settings-backup-title">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon" aria-hidden="true">↥</span>
+                <div>
+                  <h2 id="settings-backup-title">Резервное копирование</h2>
+                  <span>Локальные JSON-копии</span>
+                </div>
+              </div>
             <p className="muted">Сохраняйте JSON-копию в приложение «Файлы» на iPhone или в iCloud Drive. В копию входят все расходы и категории.</p>
             <div className="backup-actions">
               <button className="primary" type="button" disabled={backupBusy} onClick={() => void exportBackup()}>Скачать резервную копию JSON</button>
@@ -442,7 +426,16 @@ export default function App() {
               <input id="backup-file" className="backup-file" type="file" accept=".json,application/json" disabled={backupBusy} onChange={(event) => void importBackup(event)} />
             </div>
             <p className="warning">Восстановление полностью заменяет текущие данные. Сначала создайте копию. Резервный файл содержит ваши финансовые записи без шифрования.</p>
-            <h2>Google Drive</h2>
+            </section>
+            {import.meta.env.VITE_PREVIEW_BUILD !== 'true' && <>
+            <section className="settings-section settings-drive-section" aria-labelledby="settings-drive-title">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon" aria-hidden="true">☁</span>
+                <div>
+                  <h2 id="settings-drive-title">Google Drive</h2>
+                  <span>Копии в облаке</span>
+                </div>
+              </div>
             <div className="google-drive-panel">
               <div className="google-drive-status">{googleConnected && isGoogleConnected() ? '● Google Drive подключён' : wasGoogleDriveAuthorized() ? '○ Google Drive: требуется возобновить сеанс' : '○ Google Drive не подключён'}</div>
               {googleConnected && isGoogleConnected() ? (
@@ -464,6 +457,16 @@ export default function App() {
               </div>}
               <p className="muted">Резервные копии создаются только вручную и сохраняются отдельными JSON-файлами в папке Spending App. Google Sheets подключим следующим этапом.</p>
             </div>
+            </section>
+            </>}
+            <section className="settings-section settings-category-section" aria-labelledby="settings-category-title">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon" aria-hidden="true">▦</span>
+                <div>
+                  <h2 id="settings-category-title">Категории расходов</h2>
+                  <span>Иконки, названия и архив</span>
+                </div>
+              </div>
             <details className="settings-categories">
               <summary className="settings-categories-toggle">
                 <span>Категории <small>({categories.length})</small></span>
@@ -494,13 +497,22 @@ export default function App() {
                 ))}
               </div>
             </details>
-            <h2>О приложении</h2>
+            </section>
+            <section className="settings-section settings-about-section" aria-labelledby="settings-about-title">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon" aria-hidden="true">ⓘ</span>
+                <div>
+                  <h2 id="settings-about-title">О приложении</h2>
+                  <span>Версия и обновления PWA</span>
+                </div>
+              </div>
             <div className="app-version-row"><span>Версия</span><strong>{packageInfo.version}{import.meta.env.VITE_BUILD_NUMBER ? `+${import.meta.env.VITE_BUILD_NUMBER}` : '-dev'}</strong></div>
             <button className="update-check" type="button" disabled={checkingUpdates} onClick={() => void checkForUpdates()}>
               {checkingUpdates ? 'Проверяем…' : 'Проверить обновления'}
             </button>
             {needRefresh && <button className="primary update-check" type="button" onClick={() => void applyUpdate()}>Установить новую версию</button>}
             <p className="muted">Новая версия загружается через GitHub Pages. Обновление применяется только после вашего подтверждения.</p>
+            </section>
           </section>
         )}
         {needRefresh && !updateNoticeHidden && <div className="pwa-update-banner" role="status">
@@ -512,11 +524,7 @@ export default function App() {
         </div>}
         {notice && <NoticeToast key={notice} message={notice} onDismiss={() => setNotice('')} />}
       </main>
-      <nav className="bottom-nav" aria-label="Навигация">
-        {([{id:'add',icon:'＋',name:'Добавить'},{id:'history',icon:'☷',name:'История'},{id:'stats',icon:'▥',name:'Статистика'},{id:'settings',icon:'⚙',name:'Настройки'}] as const).map((item) =>
-          <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); setNotice(''); }}><span>{item.icon}</span><small>{item.name}</small></button>
-        )}
-      </nav>
+      <BottomNav active={tab} onChange={(next) => { setTab(next); setNotice(''); }} />
     </div>
   );
 }
