@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/dutch92/spending-app/compare/spending-app-v0.6.1...spending-app-v0.7.0) (2026-11-14)
+
+
+### Features
+
+* generate iPhone and PWA PNG icons from mint diamond with Node only ([5014cd3](https://github.com/dutch92/spending-app/commit/5014cd3aa5421bcb024de963a037ac2ee99a0721))
+
 ## [0.6.1](https://github.com/dutch92/spending-app/compare/spending-app-v0.6.0...spending-app-v0.6.1) (2026-11-14)
 
 
