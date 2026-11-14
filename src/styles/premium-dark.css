@@ -1,0 +1,106 @@
+/* Stage 1 — premium dark shell and consistent existing controls. */
+html{background:var(--fp-bg)}
+body{background:var(--fp-bg);color:var(--fp-text);color-scheme:dark}
+.app{background:var(--fp-bg);color:var(--fp-text)}
+.topbar{
+  background:var(--fp-bg);border-bottom:1px solid var(--fp-stroke);
+  height:70px;padding:10px 16px;gap:11px;
+}
+.brand-mark{
+  display:grid;place-items:center;flex-shrink:0;width:40px;height:40px;
+  border-radius:13px;background:var(--fp-surface);color:var(--fp-accent);font-size:24px;
+}
+.brand-copy{display:flex;flex-direction:column;min-width:0;gap:3px}
+.brand-copy strong{color:var(--fp-text);font-size:15px;font-weight:700}
+.brand-copy span{color:var(--fp-muted);font-size:11px}
+.topbar-right{font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--fp-accent);text-align:right}
+main{color:var(--fp-text)}
+main h1{font-size:23px;font-weight:700;letter-spacing:-.03em;color:var(--fp-text)}
+main h2{color:var(--fp-text)}
+.panel,.summary,.expense,.setting-row,.app-version-row,
+.google-drive-panel,.settings-categories{
+  background:var(--fp-surface);color:var(--fp-text);
+  box-shadow:none;border-color:var(--fp-stroke);
+}
+.panel{border:1px solid var(--fp-stroke);border-radius:var(--fp-radius-lg)}
+.summary{border:1px solid var(--fp-stroke);border-radius:var(--fp-radius-lg)}
+.summary span,.summary small,.muted,.day-col small,.expense-info span{color:var(--fp-muted)}
+.summary strong{font-size:32px;letter-spacing:-.035em}
+label,.day-header{color:var(--fp-muted)}
+input,textarea,select{
+  background:var(--fp-bg);color:var(--fp-text);border:1px solid var(--fp-stroke);
+  border-radius:var(--fp-radius-sm);
+}
+input::placeholder,textarea::placeholder{color:#859ab6}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{
+  outline:2px solid var(--fp-accent);outline-offset:2px;
+}
+input:focus,textarea:focus{border-color:var(--fp-accent)}
+.category,.expense-form .category{
+  background:var(--fp-surface);color:var(--fp-text);
+  border-color:var(--fp-stroke);border-radius:var(--fp-radius-md);
+  transition:background var(--fp-motion),border-color var(--fp-motion),transform var(--fp-motion);
+}
+.category:active{transform:scale(.97)}
+.category.selected,.expense-form .category.selected{background:#294a4a;border-color:var(--fp-accent)}
+.primary,.expense-form .save-expense{
+  background:var(--fp-accent);color:var(--fp-accent-ink);
+  border-radius:var(--fp-radius-md);font-weight:700;min-height:48px;
+  transition:filter var(--fp-motion),transform var(--fp-motion);
+}
+.primary:active,.expense-form .save-expense:active{transform:scale(.99)}
+.secondary,.update-check,.add-category button,.setting-row button,.backup-import{
+  background:var(--fp-elevated);color:var(--fp-text);border-color:var(--fp-stroke);
+}
+.update-check.primary,.google-connect.primary{background:var(--fp-accent);color:var(--fp-accent-ink)}
+.text-button{color:var(--fp-accent)}
+.details-toggle{color:var(--fp-muted)}
+.picker-surface{background:var(--fp-surface);border-color:var(--fp-stroke)}
+.picker-value{color:var(--fp-text)}
+.expense{border:1px solid var(--fp-stroke);border-radius:var(--fp-radius-md)}
+.expense-icon{display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;border-radius:12px;background:var(--fp-elevated)}
+.expense-info{color:var(--fp-text)}
+.expense>strong{color:var(--fp-text)}
+.delete{color:var(--fp-muted)}
+.stat-row{padding:12px 14px;background:var(--fp-surface);border:1px solid var(--fp-stroke);border-radius:var(--fp-radius-md)}
+.stat-row>div:first-child{color:var(--fp-text)}
+.track{background:var(--fp-elevated)}
+.track span,.day-bar{background:var(--fp-accent)}
+.warning{background:#473527;color:#ffe2ad;border:1px solid #73563d}
+.settings-categories-toggle,.settings-categories .setting-row{color:var(--fp-text)}
+.settings-categories-toggle small,.settings-categories-chevron{color:var(--fp-muted)}
+.settings-categories .setting-row{background:transparent}
+.settings-categories .category-settings-item{border-color:var(--fp-stroke)}
+.category-icon-button{background:var(--fp-elevated)!important;border-color:var(--fp-stroke)!important}
+.category-icon-picker{background:var(--fp-bg);border-color:var(--fp-stroke)}
+.category-icon-grid button{background:var(--fp-surface);border-color:var(--fp-stroke)}
+.category-icon-grid button.selected{background:#294a4a;border-color:var(--fp-accent)}
+.category-icon-cancel{color:var(--fp-muted)}
+.google-drive-status{color:var(--fp-text)}
+.google-drive-panel .muted{color:var(--fp-muted)}
+.drive-backup-actions select{background:var(--fp-bg);border-color:var(--fp-stroke);color:var(--fp-text)}
+.bottom-nav{
+  background:#16263c;border-top:1px solid var(--fp-stroke);
+  height:calc(68px + env(safe-area-inset-bottom));padding:5px 0 env(safe-area-inset-bottom);
+  box-shadow:0 -8px 24px #080f2060;
+}
+.bottom-nav button{color:#8da3c1;gap:5px;transition:color var(--fp-motion);min-height:54px}
+.bottom-nav button svg{flex-shrink:0}
+.bottom-nav button small{font-size:10px;line-height:1.15}
+.bottom-nav button.active{color:var(--fp-accent);font-weight:700}
+.notice-toast{background:var(--fp-elevated);border:1px solid var(--fp-stroke)}
+.notice-toast__progress{stroke:var(--fp-accent)}
+.pwa-update-banner{background:var(--fp-surface);border:1px solid var(--fp-stroke)}
+.pwa-update-actions button{background:var(--fp-accent);color:var(--fp-accent-ink)}
+.pwa-update-actions button+button{background:var(--fp-elevated);color:var(--fp-text)}
+@media(max-width:480px){
+  .topbar{height:62px;padding:8px 12px}
+  .brand-mark{width:36px;height:36px}
+  .topbar-right{font-size:8px}
+  .bottom-nav{height:calc(64px + env(safe-area-inset-bottom))}
+  .bottom-nav button span{font-size:inherit}
+  .bottom-nav button small{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  .category,.expense-form .category,.primary,.expense-form .save-expense,.bottom-nav button{transition:none}
+}
