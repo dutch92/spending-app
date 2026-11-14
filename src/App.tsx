@@ -459,7 +459,7 @@ export default function App() {
               </div>
             </details>
             <h2>О приложении</h2>
-            <div className="app-version-row"><span>Версия</span><strong>{packageInfo.version}</strong></div>
+            <div className="app-version-row"><span>Версия</span><strong>{packageInfo.version}{import.meta.env.VITE_BUILD_NUMBER ? `+${import.meta.env.VITE_BUILD_NUMBER}` : '-dev'}</strong></div>
             <button className="update-check" type="button" disabled={checkingUpdates} onClick={() => void checkForUpdates()}>
               {checkingUpdates ? 'Проверяем…' : 'Проверить обновления'}
             </button>
