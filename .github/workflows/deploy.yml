@@ -26,7 +26,10 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
-      - run: npm run build
+      - name: Build with unique release number
+        run: npm run build
+        env:
+          VITE_BUILD_NUMBER: ${{ github.run_number }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
