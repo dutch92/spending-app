@@ -4,6 +4,7 @@ import packageInfo from '../package.json';
 import { BottomNav, type AppTab } from './components/ui/BottomNav';
 import { AddExpenseScreen } from './components/screens/AddExpenseScreen';
 import { HistoryScreen } from './components/screens/HistoryScreen';
+import { StatisticsScreen } from './components/screens/StatisticsScreen';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Category, type Expense } from './db';
 import { downloadBackup, readBackupFile, restoreBackup } from './backup';
@@ -168,7 +169,6 @@ export default function App() {
   const dailyTotals = groups.map(([day, rows]) => ({
     day, total: rows.reduce((sum, e) => sum + e.amountKopecks, 0),
   })).reverse();
-  const maxDay = Math.max(1, ...dailyTotals.map((day) => day.total));
 
   function resetForm() {
     setAmount(''); setCategoryId(''); setComment(''); setSpentAt(localDateTime(new Date())); setEditingId(null); setShowDetails(false); setShowAllCategories(false);
@@ -394,23 +394,17 @@ export default function App() {
           />
         )}
         {tab === 'stats' && (
-          <section>
-            <h1>Статистика</h1>
-            <label htmlFor="stats-month">Месяц</label>
-            <div className="picker-surface month-picker">
-              <span className="picker-value" aria-hidden="true">{monthLabel(selectedMonth)}</span>
-              <input id="stats-month" aria-label="Выбрать месяц" type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
-            </div>
-            <div className="summary"><span>Всего за месяц</span><strong>{money(total)}</strong><small>Предыдущий месяц: {money(previousTotal)}{previousTotal > 0 ? ' · ' + ((total - previousTotal) / previousTotal * 100).toFixed(1) + '%' : ''}</small></div>
-            <h2>По категориям</h2>
-            {categoryTotals.length ? categoryTotals.map(([id, sum]) => (
-              <div key={id} className="stat-row"><div><span>{categoryMap.get(id)?.icon} {categoryMap.get(id)?.name ?? 'Категория'}</span><strong>{money(sum)}</strong></div><div className="track"><span style={{ width: total ? (sum / total * 100) + '%' : '0%' }} /></div></div>
-            )) : empty}
-            <h2>Динамика по дням</h2>
-            {dailyTotals.length ? (
-              <div className="day-chart">{dailyTotals.map(({day, total: value}) => <div className="day-col" key={day} title={day + ': ' + money(value)}><div className="day-bar" style={{ height: Math.max(3, value / maxDay * 110) + 'px' }} /><small>{Number(day.slice(-2))}</small></div>)}</div>
-            ) : empty}
-          </section>
+          <StatisticsScreen
+            selectedMonth={selectedMonth}
+            monthLabel={monthLabel(selectedMonth)}
+            total={total}
+            previousTotal={previousTotal}
+            categoryTotals={categoryTotals}
+            dailyTotals={dailyTotals}
+            categoryMap={categoryMap}
+            onMonthChange={setSelectedMonth}
+            formatMoney={money}
+          />
         )}
         {tab === 'settings' && (
           <section>
