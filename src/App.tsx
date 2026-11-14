@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import packageInfo from '../package.json';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -33,6 +33,37 @@ const parseKopecks = (value: string) => {
   const result = Math.round(Number(cleaned) * 100);
   return Number.isSafeInteger(result) && result > 0 ? result : null;
 };
+
+const TOAST_DURATION_MS = 5000;
+const TOAST_EXIT_MS = 260;
+
+function NoticeToast({ message, onDismiss }: { message: string; onDismiss: () => void }) {
+  const [exiting, setExiting] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setExiting(true), TOAST_DURATION_MS);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!exiting) return;
+    const timer = window.setTimeout(onDismiss, TOAST_EXIT_MS);
+    return () => window.clearTimeout(timer);
+  }, [exiting, onDismiss]);
+
+  return (
+    <div className={`notice-toast${exiting ? ' notice-toast--exit' : ''}`} role="status" aria-live="polite">
+      <span className="notice-toast__message">{message}</span>
+      <button className="notice-toast__dismiss" type="button" onClick={onDismiss} aria-label="Закрыть уведомление">
+        <svg className="notice-toast__timer" viewBox="0 0 40 40" width="36" height="36" aria-hidden="true">
+          <circle className="notice-toast__track" cx="20" cy="20" r="16" />
+          <circle className="notice-toast__progress" cx="20" cy="20" r="16" />
+        </svg>
+        <span className="notice-toast__close" aria-hidden="true">×</span>
+      </button>
+    </div>
+  );
+}
 
 export default function App() {
   const expenses = useLiveQuery(() => db.expenses.orderBy('spentAt').reverse().toArray(), []) ?? [];
@@ -479,7 +510,7 @@ export default function App() {
             <button type="button" onClick={() => setUpdateNoticeHidden(true)}>Позже</button>
           </div>
         </div>}
-        {notice && <div className="notice" role="status" onClick={() => setNotice('')}>{notice} <span>×</span></div>}
+        {notice && <NoticeToast key={notice} message={notice} onDismiss={() => setNotice('')} />}
       </main>
       <nav className="bottom-nav" aria-label="Навигация">
         {([{id:'add',icon:'＋',name:'Добавить'},{id:'history',icon:'☷',name:'История'},{id:'stats',icon:'▥',name:'Статистика'},{id:'settings',icon:'⚙',name:'Настройки'}] as const).map((item) =>
