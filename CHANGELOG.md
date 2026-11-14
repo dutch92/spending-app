@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/dutch92/spending-app/compare/spending-app-v0.6.0...spending-app-v0.6.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* replace history-month-chevron glyph with aligned SVG ([ee57385](https://github.com/dutch92/spending-app/commit/ee573850a9ac84a7a642128fa7631e0e99e8a410))
+* replace stats-month-chevron glyph with aligned SVG ([d3c5585](https://github.com/dutch92/spending-app/commit/d3c5585dea221ad1a5e106d389b7929bd28bfe47))
+
 ## [0.6.0](https://github.com/dutch92/spending-app/compare/spending-app-v0.5.1...spending-app-v0.6.0) (2026-11-14)
 
 
