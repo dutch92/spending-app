@@ -350,6 +350,12 @@ export default function App() {
         <span className="topbar-right">FINTECH PREMIUM</span>
       </header>
       <main>
+        {import.meta.env.VITE_PREVIEW_BUILD === 'true' && (
+          <div className="preview-notice" role="status">
+            <strong>Тестовая версия Fintech Premium Dark</strong>
+            <span>Здесь отдельная база расходов. Данные основного приложения не изменяются.</span>
+          </div>
+        )}
         {tab === 'add' && (
           <AddExpenseScreen
             amount={amount}
@@ -427,6 +433,7 @@ export default function App() {
               <input id="backup-file" className="backup-file" type="file" accept=".json,application/json" disabled={backupBusy} onChange={(event) => void importBackup(event)} />
             </div>
             <p className="warning">Восстановление полностью заменяет текущие данные. Сначала создайте копию. Резервный файл содержит ваши финансовые записи без шифрования.</p>
+            {import.meta.env.VITE_PREVIEW_BUILD !== 'true' && <>
             <h2>Google Drive</h2>
             <div className="google-drive-panel">
               <div className="google-drive-status">{googleConnected && isGoogleConnected() ? '● Google Drive подключён' : wasGoogleDriveAuthorized() ? '○ Google Drive: требуется возобновить сеанс' : '○ Google Drive не подключён'}</div>
@@ -449,6 +456,7 @@ export default function App() {
               </div>}
               <p className="muted">Резервные копии создаются только вручную и сохраняются отдельными JSON-файлами в папке Spending App. Google Sheets подключим следующим этапом.</p>
             </div>
+            </>}
             <details className="settings-categories">
               <summary className="settings-categories-toggle">
                 <span>Категории <small>({categories.length})</small></span>
