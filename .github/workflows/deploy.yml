@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  workflow_run:
+    workflows: [Validate pull request]
+    types: [completed]
 
 permissions:
   contents: read
@@ -16,12 +19,15 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'feature/fintech-premium-dark')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -30,6 +36,24 @@ jobs:
         run: npm run build
         env:
           VITE_BUILD_NUMBER: ${{ github.run_number }}
+      - name: Checkout preview branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/fintech-premium-dark
+          path: preview-src
+          persist-credentials: false
+      - name: Build preview as separate PWA
+        working-directory: preview-src
+        env:
+          VITE_PREVIEW_BUILD: 'true'
+          VITE_BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Include isolated preview in Pages artifact
+        run: |
+          mkdir -p dist/preview
+          cp -a preview-src/dist/. dist/preview/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
