@@ -406,9 +406,19 @@ export default function App() {
           />
         )}
         {tab === 'settings' && (
-          <section>
-            <h1>Настройки</h1>
-            <h2>Резервное копирование</h2>
+          <section className="premium-settings">
+            <header className="premium-settings-header">
+              <span className="premium-settings-eyebrow">УПРАВЛЕНИЕ ПРИЛОЖЕНИЕМ</span>
+              <h1>Настройки</h1>
+            </header>
+            <section className="settings-section settings-backup-section" aria-labelledby="settings-backup-title">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon" aria-hidden="true">↥</span>
+                <div>
+                  <h2 id="settings-backup-title">Резервное копирование</h2>
+                  <span>Локальные JSON-копии</span>
+                </div>
+              </div>
             <p className="muted">Сохраняйте JSON-копию в приложение «Файлы» на iPhone или в iCloud Drive. В копию входят все расходы и категории.</p>
             <div className="backup-actions">
               <button className="primary" type="button" disabled={backupBusy} onClick={() => void exportBackup()}>Скачать резервную копию JSON</button>
@@ -416,8 +426,16 @@ export default function App() {
               <input id="backup-file" className="backup-file" type="file" accept=".json,application/json" disabled={backupBusy} onChange={(event) => void importBackup(event)} />
             </div>
             <p className="warning">Восстановление полностью заменяет текущие данные. Сначала создайте копию. Резервный файл содержит ваши финансовые записи без шифрования.</p>
+            </section>
             {import.meta.env.VITE_PREVIEW_BUILD !== 'true' && <>
-            <h2>Google Drive</h2>
+            <section className="settings-section settings-drive-section" aria-labelledby="settings-drive-title">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon" aria-hidden="true">☁</span>
+                <div>
+                  <h2 id="settings-drive-title">Google Drive</h2>
+                  <span>Копии в облаке</span>
+                </div>
+              </div>
             <div className="google-drive-panel">
               <div className="google-drive-status">{googleConnected && isGoogleConnected() ? '● Google Drive подключён' : wasGoogleDriveAuthorized() ? '○ Google Drive: требуется возобновить сеанс' : '○ Google Drive не подключён'}</div>
               {googleConnected && isGoogleConnected() ? (
@@ -439,7 +457,16 @@ export default function App() {
               </div>}
               <p className="muted">Резервные копии создаются только вручную и сохраняются отдельными JSON-файлами в папке Spending App. Google Sheets подключим следующим этапом.</p>
             </div>
+            </section>
             </>}
+            <section className="settings-section settings-category-section" aria-labelledby="settings-category-title">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon" aria-hidden="true">▦</span>
+                <div>
+                  <h2 id="settings-category-title">Категории расходов</h2>
+                  <span>Иконки, названия и архив</span>
+                </div>
+              </div>
             <details className="settings-categories">
               <summary className="settings-categories-toggle">
                 <span>Категории <small>({categories.length})</small></span>
@@ -470,13 +497,22 @@ export default function App() {
                 ))}
               </div>
             </details>
-            <h2>О приложении</h2>
+            </section>
+            <section className="settings-section settings-about-section" aria-labelledby="settings-about-title">
+              <div className="settings-section-heading">
+                <span className="settings-section-icon" aria-hidden="true">ⓘ</span>
+                <div>
+                  <h2 id="settings-about-title">О приложении</h2>
+                  <span>Версия и обновления PWA</span>
+                </div>
+              </div>
             <div className="app-version-row"><span>Версия</span><strong>{packageInfo.version}{import.meta.env.VITE_BUILD_NUMBER ? `+${import.meta.env.VITE_BUILD_NUMBER}` : '-dev'}</strong></div>
             <button className="update-check" type="button" disabled={checkingUpdates} onClick={() => void checkForUpdates()}>
               {checkingUpdates ? 'Проверяем…' : 'Проверить обновления'}
             </button>
             {needRefresh && <button className="primary update-check" type="button" onClick={() => void applyUpdate()}>Установить новую версию</button>}
             <p className="muted">Новая версия загружается через GitHub Pages. Обновление применяется только после вашего подтверждения.</p>
+            </section>
           </section>
         )}
         {needRefresh && !updateNoticeHidden && <div className="pwa-update-banner" role="status">
