@@ -7,6 +7,17 @@ import { downloadBackup, readBackupFile, restoreBackup } from './backup';
 import { connectGoogleDrive, disconnectGoogleDrive, isGoogleConnected, wasGoogleDriveAuthorized } from './googleDrive';
 import { uploadDriveBackup, listDriveBackups, downloadDriveBackup, type DriveBackupFile } from './driveBackup';
 
+const CATEGORY_ICONS = [
+  '🛒', '🥦', '🍞', '🍕', '🍽️', '☕', '🍔', '🍺',
+  '🚗', '⛽', '🚕', '🚌', '✈️', '🚲', '🔧', '🛞',
+  '🏠', '🧹', '🛋️', '💡', '💧', '🧾', '🛍️', '📦',
+  '💊', '🩺', '🏥', '🦷', '💇', '💪', '🏋️', '🧘',
+  '🧸', '👶', '🎒', '📚', '🎓', '⚽', '🎨', '🎵',
+  '👕', '👟', '🧥', '👗', '🎬', '🎮', '🎭', '🎟️',
+  '📱', '💻', '🌐', '🤖', '🎁', '💐', '❤️', '🎉',
+  '💳', '💰', '🏦', '🧰', '🛠️', '🐶', '🐱', '✨',
+];
+
 type Tab = 'add' | 'history' | 'stats' | 'settings';
 const money = (kopecks: number) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(kopecks / 100);
 const localDateTime = (date: Date) => {
@@ -36,6 +47,8 @@ export default function App() {
   const [notice, setNotice] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(() => localDateTime(new Date()).slice(0, 7));
   const [categoryName, setCategoryName] = useState('');
+  const [editingCategoryIconId, setEditingCategoryIconId] = useState<string | null>(null);
+  const [customCategoryIcon, setCustomCategoryIcon] = useState('');
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [swRegistration, setSwRegistration] = useState<ServiceWorkerRegistration | null>(null);
@@ -169,6 +182,22 @@ export default function App() {
     if (!name || name === c.name || categories.some((v) => v.id !== c.id && v.name.toLowerCase() === name.toLowerCase())) return;
     await db.categories.update(c.id, { name });
   }
+  async function changeCategoryIcon(categoryId: string, icon: string) {
+    const normalized = icon.trim();
+    if (!normalized || Array.from(normalized).length > 8) {
+      setNotice('Выберите эмодзи для иконки (до 8 символов).');
+      return;
+    }
+    try {
+      await db.categories.update(categoryId, { icon: normalized });
+      setEditingCategoryIconId(null);
+      setCustomCategoryIcon('');
+      setNotice('Иконка категории изменена.');
+    } catch {
+      setNotice('Не удалось сохранить иконку.');
+    }
+  }
+
   async function authorizeGoogle() {
     setGoogleBusy(true);
     try {
@@ -407,7 +436,25 @@ export default function App() {
               <div className="settings-categories-body">
                 <form className="add-category" onSubmit={addCategory}><input aria-label="Новая категория" placeholder="Название категории" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} /><button type="submit">Добавить</button></form>
                 {categories.map((c) => (
-                  <div key={c.id} className="setting-row"><span>{c.icon} {c.name}{c.archived ? ' (архив)' : ''}</span><button onClick={() => void renameCategory(c)}>Название</button><button onClick={() => void db.categories.update(c.id, { archived: !c.archived })}>{c.archived ? 'Вернуть' : 'Скрыть'}</button></div>
+                  <div key={c.id} className="category-settings-item">
+                    <div className="setting-row">
+                      <button type="button" className="category-icon-button" aria-label={`Изменить иконку категории ${c.name}`} aria-expanded={editingCategoryIconId === c.id} onClick={() => { setEditingCategoryIconId(editingCategoryIconId === c.id ? null : c.id); setCustomCategoryIcon(''); }}>{c.icon}</button>
+                      <span className="category-setting-name">{c.name}{c.archived ? ' (архив)' : ''}</span>
+                      <button type="button" onClick={() => void renameCategory(c)}>Название</button>
+                      <button type="button" onClick={() => void db.categories.update(c.id, { archived: !c.archived })}>{c.archived ? 'Вернуть' : 'Скрыть'}</button>
+                    </div>
+                    {editingCategoryIconId === c.id && <div className="category-icon-picker">
+                      <p className="muted">Выберите иконку для «{c.name}»</p>
+                      <div className="category-icon-grid">
+                        {CATEGORY_ICONS.map((icon) => <button type="button" className={c.icon === icon ? 'selected' : ''} key={icon} aria-label={`Выбрать иконку ${icon}`} aria-pressed={c.icon === icon} onClick={() => void changeCategoryIcon(c.id, icon)}>{icon}</button>)}
+                      </div>
+                      <form className="custom-category-icon" onSubmit={(event) => { event.preventDefault(); void changeCategoryIcon(c.id, customCategoryIcon); }}>
+                        <input aria-label="Свой эмодзи" placeholder="Или вставьте свой эмодзи" value={customCategoryIcon} onChange={(event) => setCustomCategoryIcon(event.target.value)} maxLength={16} />
+                        <button type="submit" disabled={!customCategoryIcon.trim()}>Сохранить</button>
+                      </form>
+                      <button type="button" className="category-icon-cancel" onClick={() => setEditingCategoryIconId(null)}>Отмена</button>
+                    </div>}
+                  </div>
                 ))}
               </div>
             </details>
