@@ -181,3 +181,7 @@ input:focus,textarea:focus{border-color:var(--fp-accent)}
   .premium-expense-form .category{min-height:62px;gap:3px}
   .premium-expense-form .amount{height:47px}
 }
+
+/* Test environment identification */
+.preview-notice{display:flex;flex-direction:column;gap:4px;padding:12px 14px;margin-bottom:12px;border:1px solid #6ca99a;border-radius:14px;background:#203c43;color:#e4fff5;font-size:12px;line-height:1.45}
+.preview-notice strong{color:var(--fp-accent);font-size:13px}
