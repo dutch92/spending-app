@@ -228,3 +228,50 @@ input:focus,textarea:focus{border-color:var(--fp-accent)}
   .history-entry-icon{width:36px;flex-basis:36px;height:36px;font-size:20px}
   .history-entry-amount{font-size:12px}
 }
+
+/* Stage 4 — Fintech Premium analytics, no charting dependency required. */
+.premium-stats{display:flex;flex-direction:column;gap:14px;padding:4px 0 12px;min-width:0}
+.stats-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.stats-header h1{margin:3px 0 0;font-size:23px}
+.stats-eyebrow{color:var(--fp-muted);font-size:10px;letter-spacing:.12em;font-weight:700}
+.stats-month-select{width:auto;min-width:126px;max-width:100%;height:44px;padding:0 30px 0 12px;justify-content:flex-start;position:relative;background:var(--fp-surface);border-color:var(--fp-stroke)}
+.stats-month-select .picker-value{color:var(--fp-accent);text-transform:capitalize;white-space:nowrap;font-size:12px}
+.stats-month-select input{position:absolute;inset:0;width:100%;height:100%;opacity:0;z-index:1;cursor:pointer}
+.stats-month-chevron{position:absolute;right:12px;color:var(--fp-accent)}
+.stats-summary-card,.stats-card{background:var(--fp-surface);border:1px solid var(--fp-stroke);border-radius:var(--fp-radius-lg);padding:18px 16px;min-width:0}
+.stats-summary-card{display:flex;flex-direction:column;gap:9px}
+.stats-caption{font-size:13px;color:var(--fp-muted)}
+.stats-total{color:var(--fp-text);font-size:clamp(26px,7vw,34px);letter-spacing:-.035em;line-height:1.15;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.stats-previous{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:var(--fp-muted);font-size:12px}
+.stats-change{display:inline-flex;align-items:center;border-radius:20px;padding:4px 8px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.stats-change--less{background:#244c46;color:var(--fp-accent)}
+.stats-change--more{background:#533b45;color:#ffb0bd}
+.stats-card h2{font-size:17px;line-height:1.3;margin:0;color:var(--fp-text)}
+.stats-donut-frame{display:flex;justify-content:center;align-items:center;margin:10px 0 14px}
+.stats-donut{width:min(220px,100%);height:auto;overflow:visible}
+.stats-category-list{display:flex;flex-direction:column}
+.stats-category-item{display:flex;align-items:center;gap:10px;min-width:0;padding:11px 0;border-top:1px solid var(--fp-stroke)}
+.stats-legend-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%}
+.stats-category-icon{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:11px;background:var(--fp-elevated);font-size:20px}
+.stats-category-name{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.stats-category-name strong{color:var(--fp-text);font-size:13px;overflow-wrap:anywhere}
+.stats-category-name small{color:var(--fp-muted);font-size:12px}
+.stats-category-sum{flex-shrink:0;font-size:13px;color:var(--fp-text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.stats-chart-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stats-chart-heading>span{font-size:11px;color:var(--fp-muted);text-transform:capitalize}
+.stats-chart-help{margin:8px 0 10px;color:var(--fp-muted);font-size:11px}
+.stats-daily-scroll{overflow-x:auto;max-width:100%;overscroll-behavior-inline:contain;scrollbar-width:thin;scrollbar-color:var(--fp-elevated) transparent;padding-bottom:6px}
+.stats-daily-chart{height:166px;display:flex;align-items:stretch;gap:7px;width:max-content;min-width:100%;padding:8px 2px 0}
+.stats-daily-column{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;width:20px;flex:0 0 20px}
+.stats-daily-bar-slot{height:128px;width:13px;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch}
+.stats-daily-bar{display:block;min-height:3px;width:100%;border-radius:5px 5px 2px 2px;background:var(--fp-accent)}
+.stats-daily-bar--zero{background:#3e5370}
+.stats-daily-tick{font-size:10px;color:var(--fp-muted);font-variant-numeric:tabular-nums}
+.stats-empty{color:var(--fp-muted);line-height:1.5;font-size:13px;margin:16px 0 2px}
+@media(max-width:360px){
+  .stats-header{align-items:stretch}
+  .stats-month-select{width:100%}
+  .stats-category-item{gap:7px}
+  .stats-category-icon{flex-basis:34px;height:34px;font-size:18px}
+  .stats-category-sum{font-size:12px}
+}
