@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/dutch92/spending-app/compare/spending-app-v0.5.1...spending-app-v0.6.0) (2026-11-14)
+
+
+### Features
+
+* configure mint diamond SVG favicon and dark browser theme ([38ec6ac](https://github.com/dutch92/spending-app/commit/38ec6acba6014082030fe705b7383be90c313d66))
+
 ## [0.5.1](https://github.com/dutch92/spending-app/compare/spending-app-v0.5.0...spending-app-v0.5.1) (2026-11-14)
 
 
