@@ -345,9 +345,9 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand-mark" aria-hidden="true">◈</div>
+        <div className="brand-mark" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}icon.svg`} alt="" width="40" height="40" /></div>
         <div className="brand-copy"><strong>Spending App</strong><span>Личный учёт расходов</span></div>
-        <span className="topbar-right">FINTECH PREMIUM</span>
+        
       </header>
       <main>
         {import.meta.env.VITE_PREVIEW_BUILD === 'true' && (
